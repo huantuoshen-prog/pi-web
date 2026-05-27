@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { AgentMessage, SessionInfo, SessionTreeNode } from "@/lib/types";
 import { MessageView } from "./MessageView";
@@ -40,7 +40,7 @@ const TYPEWRITER_PHRASE_KEYS = Array.from({ length: 18 }, (_, i) => `phrase${i +
 
 function useTypewriterPhrases(): string[] {
   const tw = useTranslations("typewriter");
-  return TYPEWRITER_PHRASE_KEYS.map((k) => tw(k));
+  return useMemo(() => TYPEWRITER_PHRASE_KEYS.map((k) => tw(k)), [tw]);
 }
 
 function Typewriter({ phrases }: { phrases: string[] }) {
