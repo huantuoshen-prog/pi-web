@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -89,6 +90,7 @@ function UserMessageView({ message, entryId, onFork, forking, onNavigate, prevAs
   prevAssistantEntryId?: string;
   onEditContent?: (content: string) => void;
 }) {
+  const ut = useTranslations("chat");
   const [hovered, setHovered] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -182,7 +184,7 @@ function UserMessageView({ message, entryId, onFork, forking, onNavigate, prevAs
           }}>
             <button
               onClick={copyContent}
-              title="Copy message"
+              title={ut("copyMessage")}
               style={{
                 display: "flex", alignItems: "center", gap: 4,
                 padding: "3px 8px", height: 22,
@@ -207,7 +209,7 @@ function UserMessageView({ message, entryId, onFork, forking, onNavigate, prevAs
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                 </svg>
               )}
-              {copied ? "Copied" : "Copy"}
+              {copied ? ut("copied") : ut("copy")}
             </button>
           </div>
           {(canFork || canNavigate) && (
@@ -220,7 +222,7 @@ function UserMessageView({ message, entryId, onFork, forking, onNavigate, prevAs
               {canNavigate && (
                 <button
                   onClick={() => { onNavigate!(prevAssistantEntryId!); onEditContent?.(content); }}
-                  title="Edit from here — branches within this session"
+                  title={ut("editFromHereTip")}
                   style={{
                     display: "flex", alignItems: "center", gap: 4,
                     padding: "3px 8px", height: 22,
@@ -239,14 +241,14 @@ function UserMessageView({ message, entryId, onFork, forking, onNavigate, prevAs
                     <polyline points="15 10 20 15 15 20" />
                     <path d="M4 4v7a4 4 0 0 0 4 4h12" />
                   </svg>
-                  Edit from here
+                  {ut("editFromHere")}
                 </button>
               )}
               {canFork && (
                 <button
                   onClick={() => { onFork!(entryId!); }}
                   disabled={forking}
-                  title={forking ? "Creating new session…" : "New session — creates an independent copy from here"}
+                  title={forking ? ut("creating") : ut("newSessionTip")}
                   style={{
                     display: "flex", alignItems: "center", gap: 4,
                     padding: "3px 8px", height: 22,
@@ -267,7 +269,7 @@ function UserMessageView({ message, entryId, onFork, forking, onNavigate, prevAs
                     <circle cx="6" cy="18" r="3" />
                     <path d="M18 9a9 9 0 0 1-9 9" />
                   </svg>
-                  {forking ? "Creating…" : "New session"}
+                  {forking ? ut("creating") : ut("newSession")}
                 </button>
               )}
             </div>
@@ -295,6 +297,7 @@ function AssistantMessageView({
   prevTimestamp?: number;
 }) {
   const time = showTimestamp ? formatTime(message.timestamp) : null;
+  const t = useTranslations("chat");
   const blocks = message.content ?? [];
   const [hovered, setHovered] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -428,7 +431,7 @@ function AssistantMessageView({
             <>
 
               {est > 0 && (
-                <span style={{ display: "flex", alignItems: "center", gap: 4, color: "var(--text)" }} title="预估 token 数（流式接收中）">
+                <span style={{ display: "flex", alignItems: "center", gap: 4, color: "var(--text)" }} title={t("estimatedTokens")}>
                   <span style={{ display: "flex", alignItems: "center", gap: 2, fontSize: 11, fontWeight: 400 }}>
                     <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
                       <line x1="5" y1="1.5" x2="5" y2="8.5" /><polyline points="2 6 5 8.5 8 6" />
@@ -461,7 +464,7 @@ function AssistantMessageView({
       }}>
         {message.usage && !isStreaming && (
           <div style={{ fontSize: 11, color: "var(--text-dim)" }}>
-            {formatUsage(message.usage)}
+            {formatUsage(message.usage, { in: t("tokensIn"), out: t("tokensOut"), cache: t("tokensCacheRead"), cost: t("tokensCost") })}
           </div>
         )}
         {textContent && !isStreaming && (
@@ -562,6 +565,7 @@ function TextBlock({ block }: { block: TextContent }) {
 }
 
 function ThinkingBlock({ block, duration }: { block: ThinkingContent; duration?: number }) {
+  const tt = useTranslations("chat");
   const [expanded, setExpanded] = useState(false);
   return (
     <div
@@ -588,7 +592,7 @@ function ThinkingBlock({ block, duration }: { block: ThinkingContent; duration?:
           textAlign: "left",
         }}
       >
-        <span>Thinking</span>
+        <span>{tt("thinkingBlock")}</span>
         {duration !== undefined && (
           <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-dim)", fontVariantNumeric: "tabular-nums" }}>{duration}s</span>
         )}
@@ -703,6 +707,7 @@ function PairedResult({ text, isEmpty, isError }: {
   isEmpty: boolean;
   isError: boolean;
 }) {
+  const pt = useTranslations("chat");
   return (
     <div
       style={{
@@ -726,7 +731,7 @@ function PairedResult({ text, isEmpty, isError }: {
           opacity: isEmpty ? 0.6 : 1,
         }}
       >
-        {isEmpty ? "(no output)" : text}
+        {isEmpty ? pt("noOutput") : text}
       </pre>
     </div>
   );
@@ -756,18 +761,19 @@ function formatUsage(usage: {
   cacheRead: number;
   cacheWrite: number;
   cost: { total: number };
-}): string {
+}, labels: { in: string; out: string; cache: string; cost: string }): string {
   const parts = [];
-  if (usage.input) parts.push(`${usage.input.toLocaleString()} in`);
-  if (usage.output) parts.push(`${usage.output.toLocaleString()} out`);
-  if (usage.cacheRead) parts.push(`${usage.cacheRead.toLocaleString()} cache`);
-  if (usage.cost?.total) parts.push(`$${usage.cost.total.toFixed(4)}`);
+  if (usage.input) parts.push(`${usage.input.toLocaleString()} ${labels.in}`);
+  if (usage.output) parts.push(`${usage.output.toLocaleString()} ${labels.out}`);
+  if (usage.cacheRead) parts.push(`${usage.cacheRead.toLocaleString()} ${labels.cache}`);
+  if (usage.cost?.total) parts.push(`${labels.cost} $${usage.cost.total.toFixed(4)}`);
   return parts.join(" · ");
 }
 
 
 
 function CodeBlock({ code, lang }: { code: string; lang: string }) {
+  const ct = useTranslations("chat");
   const { isDark } = useTheme();
   const [copied, setCopied] = useState(false);
 
@@ -812,7 +818,7 @@ function CodeBlock({ code, lang }: { code: string; lang: string }) {
             fontSize: 11,
           }}
         >
-          {copied ? "copied" : "copy"}
+          {copied ? ct("copied") : ct("copy")}
         </button>
       </div>
       <SyntaxHighlighter

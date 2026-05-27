@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useMemo, useRef, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import type { SessionEntry, SessionTreeNode } from "@/lib/types";
 
 interface Props {
@@ -212,6 +213,7 @@ function TreeNodeView({ node, activePathIds, depth, isLast, parentLines, onSelec
 }
 
 export function BranchNavigator({ tree, activeLeafId, onLeafChange, inline, containerRef, open: openProp, onToggle, hasSession }: Props) {
+  const bt = useTranslations("shell");
   const [openInternal, setOpenInternal] = useState(false);
   const open = openProp !== undefined ? openProp : openInternal;
   const btnRef = useRef<HTMLButtonElement>(null);
@@ -241,9 +243,9 @@ export function BranchNavigator({ tree, activeLeafId, onLeafChange, inline, cont
   }, [onLeafChange]);
 
   const noBranchReason = !hasSession
-    ? "No active session"
+    ? bt("noActiveSession")
     : !hasBranch(tree)
-      ? "This session has no branches"
+      ? bt("noBranches")
       : null;
 
   // Find first meaningful node (skip pure linear prefix)
@@ -293,7 +295,7 @@ export function BranchNavigator({ tree, activeLeafId, onLeafChange, inline, cont
           onMouseLeave={(e) => { e.currentTarget.style.color = open ? "var(--text)" : "var(--text-muted)"; }}
         >
           {branchIcon}
-          <span>Branches</span>
+          <span>{bt("branches")}</span>
         </button>
         {open && dropdownPos && (
           <div style={{
@@ -350,7 +352,7 @@ export function BranchNavigator({ tree, activeLeafId, onLeafChange, inline, cont
         }}
       >
         {branchIcon}
-        <span style={{ color: "var(--text-muted)" }}>Branches</span>
+        <span style={{ color: "var(--text-muted)" }}>{bt("branches")}</span>
         {chevron}
       </button>
 
@@ -382,7 +384,7 @@ export function BranchNavigator({ tree, activeLeafId, onLeafChange, inline, cont
             </div>
           ) : (
             <div style={{ padding: "10px 16px", fontSize: 12, color: "var(--text-muted)", fontStyle: "italic" }}>
-              {noBranchReason ?? "This session has no branches"}
+              {noBranchReason ?? bt("noBranches")}
             </div>
           )}
         </div>
