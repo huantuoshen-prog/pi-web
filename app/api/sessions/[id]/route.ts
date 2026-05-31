@@ -62,11 +62,27 @@ export async function GET(
       }
     }
 
+    // Flatten tree to avoid undici's JSON serializer stack overflow on deeply
+    // nested trees (2200+ depth). Children are stored as string IDs.
+    const flatTree: Array<{ entry: SessionEntry; children: string[]; label?: string }> = [];
+    {
+      const stack = [...tree];
+      while (stack.length > 0) {
+        const n = stack.pop()!;
+        flatTree.push({
+          entry: n.entry as SessionEntry,
+          children: n.children.map((c: { entry: { id: string } }) => c.entry.id),
+          label: (n as { label?: string }).label,
+        });
+        stack.push(...n.children);
+      }
+    }
+
     return NextResponse.json({
       sessionId: id,
       filePath,
       info,
-      tree,
+      tree: flatTree,
       leafId,
       context,
       ...(agentState !== undefined ? { agentState } : {}),

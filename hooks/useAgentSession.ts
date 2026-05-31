@@ -6,6 +6,29 @@ import { normalizeToolCalls } from "@/lib/normalize";
 import { sendAgentCommand } from "@/lib/agent-client";
 import type { ToolEntry } from "@/components/ToolPanel";
 
+/**
+ * Rebuild a nested SessionTreeNode[] from the flat tree format used by the API
+ * to avoid undici's JSON serializer stack overflow on deeply nested trees.
+ * The original nested tree structure is preserved for downstream consumers.
+ */
+function rebuildTree(flatTree: Array<{ entry: { id: string; parentId?: string | null }; children: string[]; label?: string }>): SessionTreeNode[] {
+  const nodeMap = new Map<string, SessionTreeNode>();
+  for (const ft of flatTree) {
+    nodeMap.set(ft.entry.id, { entry: ft.entry as SessionTreeNode['entry'], children: [], label: ft.label });
+  }
+  const roots: SessionTreeNode[] = [];
+  for (const ft of flatTree) {
+    const node = nodeMap.get(ft.entry.id)!;
+    const parentId = ft.entry.parentId ?? null;
+    if (!parentId || !nodeMap.has(parentId)) {
+      roots.push(node);
+    } else {
+      nodeMap.get(parentId)!.children.push(node);
+    }
+  }
+  return roots;
+}
+
 export interface SessionData {
   sessionId: string;
   filePath: string;
@@ -166,6 +189,11 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
       }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const d = await res.json() as SessionData & { agentState?: { running: boolean; state?: { isStreaming?: boolean; isCompacting?: boolean; contextUsage?: { percent: number | null; contextWindow: number; tokens: number | null } | null; systemPrompt?: string; thinkingLevel?: string } } };
+      // API may return a flat tree to avoid JSON serialization stack overflow.
+      // Rebuild to the nested format expected by BranchNavigator et al.
+      if (Array.isArray(d.tree) && d.tree.length > 0 && 'children' in d.tree[0] && Array.isArray(d.tree[0].children) && typeof d.tree[0].children[0] === 'string') {
+        d.tree = rebuildTree(d.tree as unknown as Array<{ entry: { id: string; parentId?: string | null }; children: string[]; label?: string }>);
+      }
       setData(d);
       setActiveLeafId(d.leafId);
       setMessages(d.context.messages);
