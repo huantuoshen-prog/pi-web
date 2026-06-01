@@ -89,6 +89,8 @@ export interface UseAgentSessionOptions {
   onSystemPromptChange?: (prompt: string | null) => void;
   setNewSessionModel?: (model: { provider: string; modelId: string } | null) => void;
   setToolPreset?: (preset: "none" | "default" | "full") => void;
+  /** Called when a session title is auto-generated after agent ends */
+  onTitleGenerated?: (sessionId: string, title: string) => void;
 }
 
 export type ThinkingLevelOption = "auto" | "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
@@ -108,7 +110,7 @@ export interface AttachedImage {
 export function useAgentSession(opts: UseAgentSessionOptions) {
   const {
     session, newSessionCwd, onAgentEnd, onSessionCreated, onSessionForked,
-    modelsRefreshKey, onBranchDataChange, onSystemPromptChange,
+    modelsRefreshKey, onBranchDataChange, onSystemPromptChange, onTitleGenerated,
   } = opts;
 
   const isNew = session === null && newSessionCwd !== null;
@@ -291,6 +293,19 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
               if (d.state?.systemPrompt !== undefined) setSystemPrompt(d.state.systemPrompt ?? null);
             })
             .catch(() => {});
+          // Auto-generate title if session doesn't have a custom name
+          const currentSessionId = sessionIdRef.current;
+          const sessionHasName = !!session?.name;
+          if (!sessionHasName) {
+            fetch(`/api/sessions/${encodeURIComponent(currentSessionId)}/generate-title`, { method: "POST" })
+              .then((r) => r.json())
+              .then((data: { title?: string; skipped?: boolean; error?: string }) => {
+                if (data.title && !data.skipped) {
+                  onTitleGenerated?.(currentSessionId, data.title);
+                }
+              })
+              .catch(() => {}); // Silently ignore title generation failures
+          }
         }
         onAgentEnd?.();
         break;
@@ -353,7 +368,7 @@ export function useAgentSession(opts: UseAgentSessionOptions) {
         }
         break;
     }
-  }, [loadSession, onAgentEnd]);
+  }, [loadSession, onAgentEnd, onTitleGenerated, session?.name]);
   handleAgentEventRef.current = handleAgentEvent;
 
   const handleSend = useCallback(async (message: string, images?: AttachedImage[]) => {
