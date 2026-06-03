@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { Group, Panel, Separator } from "react-resizable-panels";
 import { SessionSidebar } from "./SessionSidebar";
 import { ChatWindow } from "./ChatWindow";
 import { FileViewer } from "./FileViewer";
@@ -356,7 +357,7 @@ export function AppShell() {
 
   return (
     <>
-    <div style={{ display: "flex", height: "100dvh", overflow: "hidden", background: "var(--bg)" }}>
+    <Group orientation="horizontal" style={{ height: "100dvh", overflow: "hidden", background: "var(--bg)" }}>
       {/* Mobile overlay backdrop */}
       <div
         className="sidebar-overlay-backdrop"
@@ -373,22 +374,32 @@ export function AppShell() {
       />
 
       {/* Left sidebar */}
-      <div
-        className={`sidebar-container${sidebarOpen ? " sidebar-open" : " sidebar-closed"}`}
-        style={{
-          background: "var(--bg-panel)",
-          borderRight: "1px solid var(--border)",
-          display: "flex",
-          flexDirection: "column",
-          flexShrink: 0,
-          zIndex: 200,
-        }}
-      >
-        {sidebarContent}
-      </div>
+      {sidebarOpen && (
+        <>
+          <Panel defaultSize={15} minSize={10} maxSize={35}>
+            <div
+              style={{
+                height: "100%",
+                background: "var(--bg-panel)",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden",
+              }}
+            >
+              {sidebarContent}
+            </div>
+          </Panel>
+          <Separator
+            style={{ width: 4, background: "var(--border)", transition: "background 0.15s" }}
+            onMouseEnter={(e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.background = "var(--accent)"; }}
+            onMouseLeave={(e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.background = "var(--border)"; }}
+          />
+        </>
+      )}
 
       {/* Center: chat */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
+      <Panel minSize={30}>
+        <div style={{ display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0, height: "100%" }}>
         {/* Top bar with sidebar toggle */}
         <div ref={topBarRef} style={{ display: "flex", alignItems: "center", flexShrink: 0, borderBottom: "1px solid var(--border)", height: 36, background: "var(--bg-panel)" }}>
           <button
@@ -718,42 +729,53 @@ export function AppShell() {
           ) : null}
         </div>
       </div>
+      </Panel>
 
-      {/* Right panel: file viewer — always mounted, width animated via CSS */}
-      <div
-        className={`right-panel-container${rightPanelOpen ? " right-panel-open" : " right-panel-closed"}`}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          borderLeft: "1px solid var(--border)",
-          background: "var(--bg)",
-        }}
-      >
-        {/* Right panel tab bar */}
-        <div style={{ display: "flex", alignItems: "center", flexShrink: 0, background: "var(--bg-panel)", borderBottom: "1px solid var(--border)", height: 36 }}>
-          <div style={{ flex: 1, overflow: "hidden" }}>
-            <TabBar
-              tabs={fileTabs}
-              activeTabId={activeFileTabId ?? ""}
-              onSelectTab={setActiveFileTabId}
-              onCloseTab={handleCloseFileTab}
-            />
-          </div>
+      {/* Right panel: file viewer */}
+      {rightPanelOpen && (
+        <>
+          <Separator
+            style={{ width: 4, background: "var(--border)", transition: "background 0.15s" }}
+            onMouseEnter={(e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.background = "var(--accent)"; }}
+            onMouseLeave={(e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.background = "var(--border)"; }}
+          />
+          <Panel defaultSize={25} minSize={15} maxSize={45}>
+            <div
+              style={{
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                borderLeft: "1px solid var(--border)",
+                background: "var(--bg)",
+              }}
+            >
+              {/* Right panel tab bar */}
+              <div style={{ display: "flex", alignItems: "center", flexShrink: 0, background: "var(--bg-panel)", borderBottom: "1px solid var(--border)", height: 36 }}>
+                <div style={{ flex: 1, overflow: "hidden" }}>
+                  <TabBar
+                    tabs={fileTabs}
+                    activeTabId={activeFileTabId ?? ""}
+                    onSelectTab={setActiveFileTabId}
+                    onCloseTab={handleCloseFileTab}
+                  />
+                </div>
+              </div>
 
-        </div>
-
-        {/* File content */}
-        <div style={{ flex: 1, overflow: "hidden" }}>
-          {activeFileTab?.filePath ? (
-            <FileViewer filePath={activeFileTab.filePath} cwd={activeCwd ?? undefined} />
-          ) : (
-            <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-dim)", fontSize: 12 }}>
-              {sh("noFileOpen")}
+              {/* File content */}
+              <div style={{ flex: 1, overflow: "hidden" }}>
+                {activeFileTab?.filePath ? (
+                  <FileViewer filePath={activeFileTab.filePath} cwd={activeCwd ?? undefined} />
+                ) : (
+                  <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-dim)", fontSize: 12 }}>
+                    {sh("noFileOpen")}
+                  </div>
+                )}
+              </div>
             </div>
-          )}
-        </div>
-      </div>
-    </div>
+          </Panel>
+        </>
+      )}
+    </Group>
     {/* File panel toggle — always visible at top-right */}
     <button
       onClick={() => setRightPanelOpen((v) => !v)}
