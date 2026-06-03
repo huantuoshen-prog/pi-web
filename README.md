@@ -87,16 +87,18 @@ lib/
 
 ## 分叉特性
 
-基于上游 `agegr/pi-web` v0.6.12，合入了以下 PR：
+基于上游 `agegr/pi-web` v0.6.12，通过 `git cherry-pick` 合入以下社区 PR（提交作者信息完整保留）：
 
-| PR | 功能 |
-|----|------|
-| #42 | 修复长会话 JSON 栈溢出 |
-| #40 | 运行时读取版本号 |
-| #14 | LaTeX 数学公式渲染 |
-| #45 | 会话完成后自动生成摘要标题 |
-| #39 | 工具独立开关面板 |
-| #26 | 命令复制按钮 |
-| #34 | docx/pdf 文件预览 |
-| #13 | Electron 桌面应用 |
-| #19 | 中英双语国际化 (next-intl) |
+| 上游 PR | 作者 | 功能 |
+|---------|------|------|
+| [#42](https://github.com/agegr/pi-web/pull/42) | LQFHUB | 修复长会话 JSON 栈溢出 |
+| [#40](https://github.com/agegr/pi-web/pull/40) | fallleave001 | 运行时读取版本号 |
+| [#14](https://github.com/agegr/pi-web/pull/14) | xianzhe233 | LaTeX 数学公式渲染 |
+| [#45](https://github.com/agegr/pi-web/pull/45) | looluo | 会话完成后自动生成摘要标题 |
+| [#39](https://github.com/agegr/pi-web/pull/39) | fallleave001 | 工具独立开关面板 |
+| [#26](https://github.com/agegr/pi-web/pull/26) | kami1983 | 命令复制按钮 |
+| [#34](https://github.com/agegr/pi-web/pull/34) | liuzyong | docx/pdf 文件预览 |
+| [#13](https://github.com/agegr/pi-web/pull/13) | Chasen-Liao | Electron 桌面应用 |
+| [#19](https://github.com/agegr/pi-web/pull/19) | huantuoshen-prog | 中英双语国际化 (next-intl) |
+
+可通过 `git log` 查看完整的作者和时间戳记录。
