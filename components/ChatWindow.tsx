@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import type { AgentMessage, SessionInfo, SessionTreeNode } from "@/lib/types";
 import { MessageView } from "./MessageView";
 import { ChatInput, type ChatInputHandle } from "./ChatInput";
@@ -21,41 +22,26 @@ interface Props {
   onSystemPromptChange?: (prompt: string | null) => void;
   onSessionStatsChange?: (stats: { tokens: { input: number; output: number; cacheRead: number; cacheWrite: number }; cost?: number } | null) => void;
   onContextUsageChange?: (usage: { percent: number | null; contextWindow: number; tokens: number | null } | null) => void;
-  onTitleGenerated?: (sessionId: string, title: string) => void;
 }
 
-function phaseLabel(phase: AgentPhase): string {
+function phaseLabel(phase: AgentPhase, t: ReturnType<typeof useTranslations<"chat">>): string {
   if (phase?.kind === "running_tools") {
     const names = phase.tools.map((t) => t.name);
-    if (names.length === 0) return "Running tool...";
-    if (names.length === 1) return `Running ${names[0]}...`;
-    if (names.length <= 3) return `Running ${names.join(", ")}...`;
-    return `Running ${names.slice(0, 2).join(", ")} (+${names.length - 2})...`;
+    if (names.length === 0) return t("runningToolGeneric");
+    if (names.length === 1) return t("runningTool", { tool: names[0] });
+    if (names.length <= 3) return t("runningTool", { tool: names.join(", ") });
+    return t("runningTool", { tool: `${names.slice(0, 2).join(", ")} (+${names.length - 2})` });
   }
-  if (phase?.kind === "waiting_model") return "Waiting for model...";
-  return "Thinking...";
+  if (phase?.kind === "waiting_model") return t("waitingModel");
+  return t("thinking");
 }
 
-const TYPEWRITER_PHRASES = [
-  "ready when you are.",
-  "ask me anything.",
-  "let's build something cool.",
-  "explore your codebase.",
-  "draft an email.",
-  "summarize that paper.",
-  "plan your weekend.",
-  "explain it like I'm five.",
-  "pair-program with me.",
-  "fix that pesky bug.",
-  "translate to 中文.",
-  "write a haiku.",
-  "brainstorm ideas.",
-  "review my pull request.",
-  "what should we cook tonight?",
-  "ship it.",
-  "make it pretty.",
-  "rubber-duck with me.",
-];
+const TYPEWRITER_PHRASE_KEYS = Array.from({ length: 18 }, (_, i) => `phrase${i + 1}` as const);
+
+function useTypewriterPhrases(): string[] {
+  const tw = useTranslations("typewriter");
+  return useMemo(() => TYPEWRITER_PHRASE_KEYS.map((k) => tw(k)), [tw]);
+}
 
 function Typewriter({ phrases }: { phrases: string[] }) {
   const [phraseIdx, setPhraseIdx] = useState(() => Math.floor(Math.random() * phrases.length));
@@ -91,7 +77,9 @@ function Typewriter({ phrases }: { phrases: string[] }) {
   );
 }
 
-export function ChatWindow({ session, newSessionCwd, onAgentEnd, onSessionCreated, onSessionForked, modelsRefreshKey, chatInputRef, onBranchDataChange, onSystemPromptChange, onSessionStatsChange, onContextUsageChange, onTitleGenerated }: Props) {
+export function ChatWindow({ session, newSessionCwd, onAgentEnd, onSessionCreated, onSessionForked, modelsRefreshKey, chatInputRef, onBranchDataChange, onSystemPromptChange, onSessionStatsChange, onContextUsageChange }: Props) {
+  const typewriterPhrases = useTypewriterPhrases();
+  const cwt = useTranslations("chat");
   const {
     loading, error, messages, entryIds, streamState,
     agentRunning, modelNames, modelList, modelThinkingLevels, modelThinkingLevelMaps, toolPreset, thinkingLevel,
@@ -106,7 +94,7 @@ export function ChatWindow({ session, newSessionCwd, onAgentEnd, onSessionCreate
     handleToolPresetChange, handleThinkingLevelChange, handleAgentEventRef,
   } = useAgentSession({
     session, newSessionCwd, onAgentEnd, onSessionCreated, onSessionForked,
-    modelsRefreshKey, onBranchDataChange, onSystemPromptChange, onTitleGenerated,
+    modelsRefreshKey, onBranchDataChange, onSystemPromptChange,
   });
 
   const { soundEnabled, onSoundToggle, playDoneSound } = useAudio();
@@ -199,7 +187,7 @@ export function ChatWindow({ session, newSessionCwd, onAgentEnd, onSessionCreate
   if (loading) {
     return (
       <div className="flex h-full items-center justify-center text-text-muted">
-        Loading session...
+        {cwt("loadingSession")}
       </div>
     );
   }
@@ -271,10 +259,17 @@ export function ChatWindow({ session, newSessionCwd, onAgentEnd, onSessionCreate
                 <span style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.02em", color: "var(--text)" }}>π</span>
                 <span style={{ fontSize: 22, color: "var(--text)", fontWeight: 700, letterSpacing: "-0.01em" }}>Pi Agent Web</span>
                 <span style={{ fontSize: 14, minWidth: 0, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
-                  <Typewriter phrases={TYPEWRITER_PHRASES} />
+                  <Typewriter phrases={typewriterPhrases} />
                 </span>
               </div>
-              <VersionDisplay />
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0 }}>
+                <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                  web <span style={{ color: "var(--text)" }}>v{process.env.NEXT_PUBLIC_APP_VERSION ?? "0.0.0"}</span>
+                </span>
+                <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                  pi <span style={{ color: "var(--text)" }}>v{process.env.NEXT_PUBLIC_PI_VERSION ?? "0.0.0"}</span>
+                </span>
+              </div>
             </div>
             {chatInputElement}
           </div>
@@ -351,7 +346,7 @@ export function ChatWindow({ session, newSessionCwd, onAgentEnd, onSessionCreate
 
             {agentRunning && !streamState.streamingMessage && (
               <div className="py-2 text-[13px] text-text-muted">
-                <span className="animate-[pulse_1.5s_infinite]">{phaseLabel(agentPhase)}</span>
+                <span className="animate-[pulse_1.5s_infinite]">{phaseLabel(agentPhase, cwt)}</span>
               </div>
             )}
 
@@ -375,27 +370,6 @@ export function ChatWindow({ session, newSessionCwd, onAgentEnd, onSessionCreate
       </div>
       </>
       )}
-    </div>
-  );
-}
-
-// Dynamic version display — reads from /api/version at runtime
-function VersionDisplay() {
-  const [versions, setVersions] = useState({ appVersion: "0.0.0", piVersion: "0.0.0" });
-  useEffect(() => {
-    fetch("/api/version")
-      .then(r => r.json())
-      .then(v => setVersions(v))
-      .catch(() => {});
-  }, []);
-  return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 2, flexShrink: 0 }}>
-      <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
-        web <span style={{ color: "var(--text)" }}>v{versions.appVersion}</span>
-      </span>
-      <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
-        pi <span style={{ color: "var(--text)" }}>v{versions.piVersion}</span>
-      </span>
     </div>
   );
 }
