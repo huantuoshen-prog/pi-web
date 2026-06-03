@@ -21,7 +21,7 @@
   "scripts": {
     "dev": "next dev -p 30141",
     "build": "next build --webpack",
-    "start": "node --require ./preload.js node_modules/next/dist/bin/next start -p 30141",
+    "start": "node --require ./preload.js .next/standalone/server.js",
     "lint": "eslint .",
     "release": "npm version patch --no-git-tag-version && npm run build && npm publish --access public",
     "build:electron": "tsc -p electron/tsconfig.json",
