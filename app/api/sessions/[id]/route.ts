@@ -8,6 +8,7 @@ import {
   buildSessionContext,
   listAllSessions,
 } from "@/lib/session-reader";
+import type { SessionEntry } from "@/lib/types";
 import { getRpcSession } from "@/lib/rpc-manager";
 
 export async function GET(
