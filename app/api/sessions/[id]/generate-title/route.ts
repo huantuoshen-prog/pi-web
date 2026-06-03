@@ -43,8 +43,8 @@ export async function POST(
         }
         if (Array.isArray(content)) {
           const textParts = content
-            .filter((b): b is { type: "text"; text: string } => b.type === "text")
-            .map((b) => b.text)
+            .filter((b) => b.type === "text")
+            .map((b) => (b as { text: string }).text)
             .join("\n");
           return `${m.role === "user" ? "User" : "Assistant"}: ${textParts}`;
         }
@@ -117,7 +117,7 @@ export async function POST(
     if (result.content && Array.isArray(result.content)) {
       const textParts = result.content
         .filter((b: { type: string }) => b.type === "text")
-        .map((b: { text: string }) => b.text);
+        .map((b) => (b as { text: string }).text);
       title = textParts.join("").trim();
     }
 
