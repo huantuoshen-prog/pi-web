@@ -376,7 +376,7 @@ export function AppShell() {
       {/* Left sidebar */}
       {sidebarOpen && (
         <>
-          <Panel defaultSize={15} minSize={10} maxSize={50}>
+          <Panel defaultSize={22} minSize={14} maxSize={55}>
             <div
               style={{
                 height: "100%",
