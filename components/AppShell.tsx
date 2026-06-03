@@ -321,7 +321,7 @@ export function AppShell() {
             ),
           },
           {
-            label: "Tools",
+            label: sh("tools"),
             onClick: () => setToolsConfigOpen(true),
             disabled: false,
             icon: (
@@ -475,7 +475,7 @@ export function AppShell() {
                       </svg>
                     )}
                     {l !== locale && <span style={{ width: 12 }} />}
-                    {l === "zh-CN" ? "中文" : "English"}
+                    {l === "zh-CN" ? sh("chinese") : sh("english")}
                   </button>
                 ))}
               </div>

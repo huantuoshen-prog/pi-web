@@ -196,7 +196,7 @@ function UserMessageView({ message, entryId, onFork, forking, onNavigate, prevAs
           }}>
             <button
               onClick={copyContent}
-              title="Copy message"
+              title={mt("copyMessage")}
               style={{
                 display: "flex", alignItems: "center", gap: 4,
                 padding: "3px 8px", height: 22,
@@ -221,7 +221,7 @@ function UserMessageView({ message, entryId, onFork, forking, onNavigate, prevAs
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                 </svg>
               )}
-              {copied ? "Copied" : "Copy"}
+              {copied ? mt("copied") : mt("copy")}
             </button>
           </div>
           {(canFork || canNavigate) && (
@@ -234,7 +234,7 @@ function UserMessageView({ message, entryId, onFork, forking, onNavigate, prevAs
               {canNavigate && (
                 <button
                   onClick={() => { onNavigate!(prevAssistantEntryId!); onEditContent?.(content); }}
-                  title="Edit from here — branches within this session"
+                  title={mt("editFromHereTip")}
                   style={{
                     display: "flex", alignItems: "center", gap: 4,
                     padding: "3px 8px", height: 22,
@@ -260,7 +260,7 @@ function UserMessageView({ message, entryId, onFork, forking, onNavigate, prevAs
                 <button
                   onClick={() => { onFork!(entryId!); }}
                   disabled={forking}
-                  title={forking ? mt("creating") : "New session — creates an independent copy from here"}
+                  title={forking ? mt("creating") : mt("newSessionTip")}
                   style={{
                     display: "flex", alignItems: "center", gap: 4,
                     padding: "3px 8px", height: 22,
@@ -281,7 +281,7 @@ function UserMessageView({ message, entryId, onFork, forking, onNavigate, prevAs
                     <circle cx="6" cy="18" r="3" />
                     <path d="M18 9a9 9 0 0 1-9 9" />
                   </svg>
-                  {forking ? "Creating…" : "New session"}
+                  {forking ? mt("creating") : mt("newSession")}
                 </button>
               )}
             </div>
@@ -483,7 +483,7 @@ function AssistantMessageView({
         {textContent && !isStreaming && (
           <button
             onClick={copyContent}
-            title="Copy message"
+            title={mt("copyMessage")}
             style={{
               display: "flex", alignItems: "center", gap: 4,
               padding: "3px 8px", height: 22,
@@ -510,7 +510,7 @@ function AssistantMessageView({
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
               </svg>
             )}
-            {copied ? "Copied" : "Copy"}
+            {copied ? mt("copied") : mt("copy")}
           </button>
         )}
         {time && !isStreaming && (
@@ -581,6 +581,7 @@ function TextBlock({ block }: { block: TextContent }) {
 }
 
 function ThinkingBlock({ block, duration }: { block: ThinkingContent; duration?: number }) {
+  const mt = useTranslations("chat");
   const [expanded, setExpanded] = useState(false);
   return (
     <div
@@ -607,7 +608,7 @@ function ThinkingBlock({ block, duration }: { block: ThinkingContent; duration?:
           textAlign: "left",
         }}
       >
-        <span>Thinking</span>
+        <span>{mt("thinkingBlock")}</span>
         {duration !== undefined && (
           <span style={{ marginLeft: "auto", fontSize: 11, color: "var(--text-dim)", fontVariantNumeric: "tabular-nums" }}>{duration}s</span>
         )}
@@ -633,6 +634,7 @@ function ThinkingBlock({ block, duration }: { block: ThinkingContent; duration?:
 
 
 function ToolCallBlock({ block, result, duration }: { block: ToolCallContent; result?: ToolResultMessage; duration?: number }) {
+  const mt = useTranslations("chat");
   const [expanded, setExpanded] = useState(false);
   const [copiedToolInput, setCopiedToolInput] = useState(false);
   const inputStr = JSON.stringify(block.input, null, 2);
@@ -703,8 +705,8 @@ function ToolCallBlock({ block, result, duration }: { block: ToolCallContent; re
           <button
             type="button"
             onClick={copyToolInput}
-            aria-label={copiedToolInput ? "Tool input copied" : "Copy tool input"}
-            title={copiedToolInput ? "Copied" : "Copy tool input"}
+            aria-label={copiedToolInput ? "Tool input copied" : mt("copyToolInput")}
+            title={copiedToolInput ? mt("copied") : mt("copyToolInput")}
             style={{
               width: 26,
               height: 26,

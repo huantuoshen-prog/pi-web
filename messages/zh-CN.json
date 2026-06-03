@@ -246,7 +246,10 @@
     "openInNewTab": "在新标签页打开",
     "loadingWordPreview": "加载 Word 预览...",
     "pdfPreview": "PDF 预览",
-    "wordPreview": "Word 预览"
+    "wordPreview": "Word 预览",
+    "saved": "已保存",
+    "save": "保存",
+    "saving": "保存中..."
   },
   "shell": {
     "models": "模型",
@@ -270,7 +273,10 @@
     "noBranches": "此会话无分支",
     "branches": "分支",
     "close": "关闭",
-    "switchLanguage": "切换语言"
+    "switchLanguage": "切换语言",
+    "chinese": "中文",
+    "english": "English",
+    "tools": "工具"
   },
   "tools": {
     "title": "工具配置",

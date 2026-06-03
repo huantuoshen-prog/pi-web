@@ -246,7 +246,10 @@
     "openInNewTab": "Open in new tab",
     "loadingWordPreview": "Loading Word preview...",
     "pdfPreview": "PDF preview",
-    "wordPreview": "Word preview"
+    "wordPreview": "Word preview",
+    "saved": "Saved",
+    "save": "Save",
+    "saving": "Saving..."
   },
   "shell": {
     "models": "Models",
@@ -270,7 +273,10 @@
     "noBranches": "This session has no branches",
     "branches": "Branches",
     "close": "Close",
-    "switchLanguage": "Switch language"
+    "switchLanguage": "Switch language",
+    "chinese": "中文",
+    "english": "English",
+    "tools": "Tools"
   },
   "tools": {
     "title": "Tools",
