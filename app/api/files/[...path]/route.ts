@@ -320,7 +320,45 @@ export async function GET(
           const { convertToHtml } = await import("mammoth");
           const buffer = fs.readFileSync(filePath);
           const result = await convertToHtml({ buffer });
-          return new Response(result.value, {
+          const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root {
+    color-scheme: light dark;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 0 16px;
+    color: light-dark(#1a1a1a, #e0e0e0);
+    background: light-dark(#ffffff, #1a1a1a);
+  }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+  table td, table th {
+    border: 1px solid light-dark(#d0d0d0, #444);
+    padding: 6px 12px;
+  }
+  img {
+    max-width: 100%;
+  }
+  a { color: light-dark(#2563eb, #60a5fa); }
+  h1, h2, h3, h4, h5, h6 { color: light-dark(#111, #f0f0f0); }
+  p, li, td, th, span, div { color: light-dark(#1a1a1a, #e0e0e0); }
+</style>
+</head>
+<body>
+${result.value}
+</body>
+</html>`;
+          return new Response(html, {
             headers: {
               "Content-Type": "text/html; charset=utf-8",
               "Cache-Control": "no-cache",
