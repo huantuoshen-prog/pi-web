@@ -621,11 +621,13 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
                     <line x1="7" y1="18" x2="12" y2="18" />
                     <line x1="8" y1="21" x2="11" y2="21" />
                   </svg>
-                  <span>{(() => {
+                  <span>{ct("thinkingPrefix")}{(() => {
                     const lvl = thinkingLevel ?? "auto";
-                    if (lvl === "auto" || !thinkingLevelMap) return lvl;
+                    const labelKey = lvl === "auto" ? "thinkingAuto" : lvl === "off" ? "thinkingOff" : lvl === "minimal" ? "thinkingMinimal" : lvl === "low" ? "thinkingLow" : lvl === "medium" ? "thinkingMedium" : lvl === "high" ? "thinkingHigh" : "thinkingXhigh";
+                    const label = ct(labelKey);
+                    if (lvl === "auto" || !thinkingLevelMap) return label;
                     const mapped = thinkingLevelMap[lvl];
-                    return mapped != null ? mapped : lvl;
+                    return mapped != null && mapped !== lvl ? `${label}(${mapped})` : label;
                   })()}</span>
                 </button>
                 {thinkingDropdownOpen && (
@@ -644,8 +646,9 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
                       const key = lvl === "auto" ? "thinkingAutoDesc" : lvl === "off" ? "thinkingOffDesc" : lvl === "minimal" ? "thinkingMinimalDesc" : lvl === "low" ? "thinkingLowDesc" : lvl === "medium" ? "thinkingMediumDesc" : lvl === "high" ? "thinkingHighDesc" : "thinkingXhighDesc";
                       const desc = ct(key);
                       const mappedVal = (lvl !== "auto" && thinkingLevelMap) ? thinkingLevelMap[lvl] : undefined;
-                      const displayLabel = (mappedVal != null && mappedVal !== lvl) ? mappedVal : lvl;
-                      const showOriginal = mappedVal != null && mappedVal !== lvl;
+                      const labelKey = lvl === "auto" ? "thinkingAuto" : lvl === "off" ? "thinkingOff" : lvl === "minimal" ? "thinkingMinimal" : lvl === "low" ? "thinkingLow" : lvl === "medium" ? "thinkingMedium" : lvl === "high" ? "thinkingHigh" : "thinkingXhigh";
+                      const displayLabel = ct(labelKey);
+                      const showMapped = mappedVal != null && mappedVal !== lvl;
                       return (
                         <button
                           key={lvl}
@@ -668,7 +671,7 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
                             : <span style={{ width: 10, flexShrink: 0 }} />}
                           <span style={{ flex: 1 }}>
                             {displayLabel}
-                            {showOriginal && <span style={{ fontSize: 10, color: "var(--text-dim)", fontFamily: "var(--font-mono)", marginLeft: 5 }}>({lvl})</span>}
+                            {showMapped && <span style={{ fontSize: 10, color: "var(--text-dim)", fontFamily: "var(--font-mono)", marginLeft: 5 }}>({mappedVal})</span>}
                           </span>
                           <span style={{ fontSize: 11, color: "var(--text-dim)", marginLeft: 8 }}>{desc}</span>
                         </button>
@@ -720,12 +723,12 @@ export const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput({
                   title={isCompacting ? ct("stopCompact") : ct("compactContext")}
                 >
                   {isCompacting ? (
-                    <><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="2" y="2" width="6" height="6" rx="1" fill="currentColor" /></svg>Compacting…</>
+                    <><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="2" y="2" width="6" height="6" rx="1" fill="currentColor" /></svg>{ct("compacting")}</>
                   ) : (
                     <><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="4 14 10 14 10 20" /><polyline points="20 10 14 10 14 4" />
                       <line x1="10" y1="14" x2="3" y2="21" /><line x1="21" y1="3" x2="14" y2="10" />
-                    </svg>Compact</>
+                    </svg>{ct("compact")}</>
                   )}
                 </button>
               </div>

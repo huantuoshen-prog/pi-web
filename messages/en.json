@@ -6,7 +6,7 @@
     "followUpTitle": "Queue message after agent completes",
     "thinkingLevel": "Toggle thinking level",
     "toolPreset": "Toggle tool preset",
-    "thinkingPrefix": "Think:",
+    "thinkingPrefix": "Thinking:",
     "toolPrefix": "Tools:",
     "noTools": "No tools, chat only",
     "defaultTools": "4 built-in tools",

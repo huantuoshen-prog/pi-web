@@ -6,7 +6,7 @@
     "followUpTitle": "在 Agent 完成后排队发送",
     "thinkingLevel": "切换推理强度",
     "toolPreset": "切换工具预设",
-    "thinkingPrefix": "推理:",
+    "thinkingPrefix": "推理强度:",
     "toolPrefix": "工具:",
     "noTools": "无工具，纯聊天",
     "defaultTools": "4 项内置工具",
