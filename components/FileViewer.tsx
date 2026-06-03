@@ -9,6 +9,7 @@ import rehypeKatex from "rehype-katex";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import { useTheme } from "@/hooks/useTheme";
+import { useTranslations } from "next-intl";
 import { encodeFilePathForApi, getFileName, getRelativeFilePath } from "@/lib/file-paths";
 import { normalizeDisplayMath } from "@/lib/markdown-math";
 
@@ -126,6 +127,7 @@ function diffLines(oldLines: string[], newLines: string[]): DiffLine[] {
 }
 
 function DiffView({ oldContent, newContent }: { oldContent: string; newContent: string; language: string }) {
+  const fvd = useTranslations("files");
   const oldLines = oldContent.split("\n");
   const newLines = newContent.split("\n");
   const diff = diffLines(oldLines, newLines);
@@ -543,6 +545,7 @@ export function FileViewer({ filePath, cwd }: Props) {
 
 function TextFileViewer({ filePath, cwd }: Props) {
   const { isDark } = useTheme();
+  const fvi = useTranslations("files");
   const [data, setData] = useState<FileData | null>(null);
   const [prevContent, setPrevContent] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -786,7 +789,7 @@ function TextFileViewer({ filePath, cwd }: Props) {
                 fontWeight: viewMode === "diff" ? 600 : 400,
               }}
             >
-              Diff {changeCount > 0 && <span style={{ color: "#4ade80", marginLeft: 2 }}>+{changeCount}</span>}
+              {fvi("diff")} {changeCount > 0 && <span style={{ color: "#4ade80", marginLeft: 2 }}>+{changeCount}</span>}
             </button>
           </div>
         )}

@@ -9,6 +9,7 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vs } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { useTheme } from "@/hooks/useTheme";
+import { useTranslations } from "next-intl";
 import { normalizeDisplayMath } from "@/lib/markdown-math";
 import type {
   AgentMessage,
@@ -100,6 +101,7 @@ function UserMessageView({ message, entryId, onFork, forking, onNavigate, prevAs
   prevAssistantEntryId?: string;
   onEditContent?: (content: string) => void;
 }) {
+  const mt = useTranslations("chat");
   const [hovered, setHovered] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -258,7 +260,7 @@ function UserMessageView({ message, entryId, onFork, forking, onNavigate, prevAs
                 <button
                   onClick={() => { onFork!(entryId!); }}
                   disabled={forking}
-                  title={forking ? "Creating new session…" : "New session — creates an independent copy from here"}
+                  title={forking ? mt("creating") : "New session — creates an independent copy from here"}
                   style={{
                     display: "flex", alignItems: "center", gap: 4,
                     padding: "3px 8px", height: 22,
@@ -306,6 +308,7 @@ function AssistantMessageView({
   showTimestamp?: boolean;
   prevTimestamp?: number;
 }) {
+  const mt = useTranslations("chat");
   const time = showTimestamp ? formatTime(message.timestamp) : null;
   const blocks = message.content ?? [];
   const [hovered, setHovered] = useState(false);

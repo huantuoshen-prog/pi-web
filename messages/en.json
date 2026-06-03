@@ -71,7 +71,10 @@
     "thinkingHighDesc": "High thinking",
     "thinkingXhighDesc": "Maximum thinking",
     "nextTurnEffect": "Takes effect on next turn",
-    "noToolsNote": " — agent will not use any tools"
+    "noToolsNote": " — agent will not use any tools",
+    "steerPlaceholder": "Steer: inject immediately / Follow-up: queue after…",
+    "toolInputCopied": "Copied",
+    "copyToolInput": "Copy tool input"
   },
   "sidebar": {
     "newSession": "New Session",
@@ -235,7 +238,15 @@
     "image": "image",
     "audio": "audio",
     "failedLoadImage": "Failed to load image",
-    "failedLoadAudio": "Failed to load audio"
+    "failedLoadAudio": "Failed to load audio",
+    "saveFile": "Save file",
+    "cancelEditing": "Cancel editing",
+    "editFileContent": "Edit file content",
+    "printPreview": "Print preview",
+    "openInNewTab": "Open in new tab",
+    "loadingWordPreview": "Loading Word preview...",
+    "pdfPreview": "PDF preview",
+    "wordPreview": "Word preview"
   },
   "shell": {
     "models": "Models",
@@ -260,6 +271,19 @@
     "branches": "Branches",
     "close": "Close",
     "switchLanguage": "Switch language"
+  },
+  "tools": {
+    "title": "Tools",
+    "enableAll": "Enable all",
+    "disableAll": "Disable all",
+    "loading": "Loading tools...",
+    "noToolsAvailable": "No tools available. Select a workspace directory first.",
+    "builtin": "Built-in",
+    "extensions": "Extensions",
+    "takesEffect": "Takes effect on next new session",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving..."
   },
   "typewriter": {
     "phrase1": "ready when you are.",

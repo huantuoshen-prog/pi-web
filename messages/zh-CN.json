@@ -71,7 +71,10 @@
     "thinkingHighDesc": "高强度推理",
     "thinkingXhighDesc": "最高强度推理",
     "nextTurnEffect": "下次对话生效",
-    "noToolsNote": " — Agent 将不使用任何工具"
+    "noToolsNote": " — Agent 将不使用任何工具",
+    "steerPlaceholder": "插话: 立即注入 / 排队: 完成后发送…",
+    "toolInputCopied": "已复制",
+    "copyToolInput": "复制工具输入"
   },
   "sidebar": {
     "newSession": "新建会话",
@@ -235,7 +238,15 @@
     "image": "图片",
     "audio": "音频",
     "failedLoadImage": "加载图片失败",
-    "failedLoadAudio": "加载音频失败"
+    "failedLoadAudio": "加载音频失败",
+    "saveFile": "保存文件",
+    "cancelEditing": "取消编辑",
+    "editFileContent": "编辑文件内容",
+    "printPreview": "打印预览",
+    "openInNewTab": "在新标签页打开",
+    "loadingWordPreview": "加载 Word 预览...",
+    "pdfPreview": "PDF 预览",
+    "wordPreview": "Word 预览"
   },
   "shell": {
     "models": "模型",
@@ -260,6 +271,19 @@
     "branches": "分支",
     "close": "关闭",
     "switchLanguage": "切换语言"
+  },
+  "tools": {
+    "title": "工具配置",
+    "enableAll": "全部启用",
+    "disableAll": "全部禁用",
+    "loading": "加载工具中...",
+    "noToolsAvailable": "无可用工具。请先选择工作区目录。",
+    "builtin": "内置",
+    "extensions": "扩展",
+    "takesEffect": "下次新建会话时生效",
+    "cancel": "取消",
+    "save": "保存",
+    "saving": "保存中..."
   },
   "typewriter": {
     "phrase1": "我准备好了。",

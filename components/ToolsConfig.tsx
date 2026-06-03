@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import type { ToolEntry } from "./ToolPanel";
 
 interface Props {
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function ToolsConfig({ cwd, onClose }: Props) {
+  const t = useTranslations("tools");
   const [tools, setTools] = useState<ToolEntry[]>([]);
   const [active, setActive] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -115,7 +117,7 @@ export function ToolsConfig({ cwd, onClose }: Props) {
           }}
         >
           <span style={{ fontSize: 15, fontWeight: 700, color: "var(--text)" }}>
-            Tools
+            {t("title")}
           </span>
           {tools.length > 0 && (
             <div style={{ display: "flex", gap: 6 }}>
@@ -131,7 +133,7 @@ export function ToolsConfig({ cwd, onClose }: Props) {
                   fontSize: 11,
                 }}
               >
-                Enable all
+                {t("enableAll")}
               </button>
               <button
                 onClick={() => setAll(false)}
@@ -145,7 +147,7 @@ export function ToolsConfig({ cwd, onClose }: Props) {
                   fontSize: 11,
                 }}
               >
-                Disable all
+                {t("disableAll")}
               </button>
             </div>
           )}
@@ -155,18 +157,18 @@ export function ToolsConfig({ cwd, onClose }: Props) {
         <div style={{ flex: 1, overflow: "auto", padding: "8px 0" }}>
           {loading ? (
             <div style={{ padding: "40px 18px", textAlign: "center", fontSize: 12, color: "var(--text-dim)" }}>
-              Loading tools...
+              {t("loading")}
             </div>
           ) : tools.length === 0 ? (
             <div style={{ padding: "40px 18px", textAlign: "center", fontSize: 12, color: "var(--text-dim)" }}>
-              No tools available. Select a workspace directory first.
+              {t("noToolsAvailable")}
             </div>
           ) : (
             <>
               {builtinTools.length > 0 && (
                 <>
                   <div style={{ padding: "4px 18px", fontSize: 11, color: "var(--text-dim)", fontWeight: 600 }}>
-                    Built-in
+                    {t("builtin")}
                   </div>
                   {builtinTools.map(tool => (
                     <ToolRow key={tool.name} tool={tool} active={active.has(tool.name)} onToggle={toggle} />
@@ -176,7 +178,7 @@ export function ToolsConfig({ cwd, onClose }: Props) {
               {extensionTools.length > 0 && (
                 <>
                   <div style={{ padding: "12px 18px 4px", fontSize: 11, color: "var(--text-dim)", fontWeight: 600 }}>
-                    Extensions
+                    {t("extensions")}
                   </div>
                   {extensionTools.map(tool => (
                     <ToolRow key={tool.name} tool={tool} active={active.has(tool.name)} onToggle={toggle} />
@@ -199,7 +201,7 @@ export function ToolsConfig({ cwd, onClose }: Props) {
           }}
         >
           <span style={{ fontSize: 10, color: "var(--text-dim)" }}>
-            Takes effect on next new session
+            {t("takesEffect")}
           </span>
           <button
             onClick={onClose}
@@ -213,7 +215,7 @@ export function ToolsConfig({ cwd, onClose }: Props) {
               fontSize: 12,
             }}
           >
-            Cancel
+            {t("cancel")}
           </button>
           <button
             onClick={handleSave}
@@ -229,7 +231,7 @@ export function ToolsConfig({ cwd, onClose }: Props) {
               opacity: saving || loading || tools.length === 0 ? 0.6 : 1,
             }}
           >
-            {saving ? "Saving..." : "Save"}
+            {saving ? t("saving") : t("save")}
           </button>
         </div>
       </div>
