@@ -104,6 +104,7 @@ export function useTheme() {
 
   useEffect(() => {
     if (themeMode === "manual") return;
+    if (themeMode === "sun" && !coords) return; // wait for location
 
     const resolve = (): Theme => {
       if (themeMode === "system") return resolveSystemTheme();
