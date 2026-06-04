@@ -35,7 +35,7 @@ function saveVisible(v: VisibleButtons) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(v)); } catch { /* ignore */ }
 }
 
-type Category = "general" | "panels" | "about";
+type Category = "appearance" | "general" | "panels" | "about";
 
 interface Props {
   sidebarOpen: boolean;
@@ -62,7 +62,7 @@ export function SettingsConfig({
 }: Props) {
   const sh = useTranslations("shell");
   const [visible, setVisible] = useState<VisibleButtons>(loadVisible);
-  const [category, setCategory] = useState<Category>("general");
+  const [category, setCategory] = useState<Category>("appearance");
 
   useEffect(() => {
     onVisibilityChange(visible);
@@ -100,10 +100,17 @@ export function SettingsConfig({
     <div style={{ fontSize: 11, fontWeight: 600, color: "var(--text-dim)", marginBottom: 4, textTransform: "uppercase", letterSpacing: "0.05em", ...style }}>{children}</div>
   );
 
+  const isZh = currentLocale === "zh-CN";
+
   const CATEGORIES: { key: Category; label: string; icon: React.ReactNode }[] = [
     {
+      key: "appearance",
+      label: isZh ? "外观" : "Appearance",
+      icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+    },
+    {
       key: "general",
-      label: "通用",
+      label: isZh ? "通用" : "General",
       icon: <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>,
     },
     {
@@ -118,16 +125,14 @@ export function SettingsConfig({
     },
   ];
 
-  const isZh = currentLocale === "zh-CN";
-
   const renderContent = () => {
     switch (category) {
-      case "general":
+      case "appearance":
         return (
           <>
-            <SecTitle>{isZh ? "外观" : "Appearance"}</SecTitle>
+            <SecTitle>{sh("themeToggle")}</SecTitle>
             <div style={{ padding: "0 0 12px" }}>
-              <Toggle label={sh("themeToggle")} value={isDark} onChange={() => onToggleTheme()} />
+              <Toggle label={isDark ? (isZh ? "深色模式" : "Dark mode") : (isZh ? "浅色模式" : "Light mode")} value={isDark} onChange={() => onToggleTheme()} />
             </div>
 
             <SecTitle>{isZh ? "语言" : "Language"}</SecTitle>
@@ -145,7 +150,12 @@ export function SettingsConfig({
                 </button>
               ))}
             </div>
+          </>
+        );
 
+      case "general":
+        return (
+          <>
             <SecTitle>{sh("topbarButtons")}</SecTitle>
             <Toggle label={sh("sidebarToggle")} value={visible.sidebar} onChange={(v) => setVisible((p) => ({ ...p, sidebar: v }))} />
             <Toggle label={sh("languageSwitch")} value={visible.locale} onChange={(v) => setVisible((p) => ({ ...p, locale: v }))} />
