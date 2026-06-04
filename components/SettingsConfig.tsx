@@ -236,7 +236,7 @@ export function SettingsConfig({
     >
       <div
         style={{
-          width: 640, maxHeight: "82vh", background: "var(--bg)", border: "1px solid var(--border)",
+          width: "80vw", height: "80vh", background: "var(--bg)", border: "1px solid var(--border)",
           borderRadius: 12, display: "flex", flexDirection: "row",
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)", overflow: "hidden",
         }}
