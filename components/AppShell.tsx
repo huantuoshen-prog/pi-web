@@ -124,7 +124,9 @@ export function AppShell() {
     return () => document.removeEventListener("mousedown", handler);
   }, [localeMenuOpen]);
 
-  // Panel resize drag handlers
+  // Panel resize drag handlers — use refs for 60fps DOM updates, sync to state on mouseup
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const rightPanelRef = useRef<HTMLDivElement>(null);
   const resizeRef = useRef<{ target: "sidebar" | "right"; startX: number; startWidth: number } | null>(null);
   const [resizing, setResizing] = useState(false);
   useEffect(() => {
@@ -132,13 +134,25 @@ export function AppShell() {
       if (!resizeRef.current) return;
       const { target, startX, startWidth } = resizeRef.current;
       const delta = e.clientX - startX;
-      if (target === "sidebar") {
-        setSidebarWidth(Math.max(200, Math.min(800, startWidth + delta)));
-      } else {
-        setRightPanelWidth(Math.max(300, Math.min(window.innerWidth * 0.6, startWidth - delta)));
-      }
+      const w = target === "sidebar"
+        ? Math.max(200, Math.min(800, startWidth + delta))
+        : Math.max(300, Math.min(window.innerWidth * 0.6, startWidth - delta));
+      const el = target === "sidebar" ? sidebarRef.current : rightPanelRef.current;
+      if (el) el.style.width = w + "px";
     };
-    const onUp = () => { resizeRef.current = null; setResizing(false); document.body.style.cursor = ""; document.body.style.userSelect = ""; };
+    const onUp = () => {
+      if (!resizeRef.current) return;
+      const { target } = resizeRef.current;
+      const el = target === "sidebar" ? sidebarRef.current : rightPanelRef.current;
+      if (el) {
+        const w = parseInt(el.style.width);
+        if (target === "sidebar") setSidebarWidth(w); else setRightPanelWidth(w);
+      }
+      resizeRef.current = null;
+      setResizing(false);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
     document.addEventListener("mousemove", onMove);
     document.addEventListener("mouseup", onUp);
     return () => { document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); };
@@ -406,6 +420,7 @@ export function AppShell() {
       {sidebarOpen && (
         <>
           <div
+            ref={sidebarRef}
             style={{
               width: sidebarWidth,
               flexShrink: 0,
@@ -770,6 +785,7 @@ export function AppShell() {
             onMouseLeave={(e) => { if (!resizeRef.current) (e.currentTarget as HTMLElement).style.background = "var(--border)"; }}
           />
           <div
+            ref={rightPanelRef}
             style={{
               width: rightPanelWidth,
               flexShrink: 0,
