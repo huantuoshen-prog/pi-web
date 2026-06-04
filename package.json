@@ -19,7 +19,7 @@
     "package.json"
   ],
   "scripts": {
-    "dev": "next dev -p 30141",
+    "dev": "next dev -p 30141 --webpack",
     "build": "next build --webpack",
     "start": "node --require ./preload.js .next/standalone/server.js",
     "lint": "eslint .",

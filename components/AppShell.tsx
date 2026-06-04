@@ -357,7 +357,7 @@ export function AppShell() {
 
   return (
     <>
-    <Group orientation="horizontal" style={{ height: "100dvh", overflow: "hidden", background: "var(--bg)" }}>
+    <Group orientation="horizontal" style={{ height: "100dvh", overflow: "hidden", background: "var(--bg)" }} defaultLayout={{ sidebar: 22, chat: 53, right: 25 }}>
       {/* Mobile overlay backdrop */}
       <div
         className="sidebar-overlay-backdrop"
@@ -376,7 +376,7 @@ export function AppShell() {
       {/* Left sidebar */}
       {sidebarOpen && (
         <>
-          <Panel defaultSize={22} minSize={14} maxSize={55}>
+          <Panel id="sidebar" defaultSize={22} minSize={14} maxSize={55}>
             <div
               style={{
                 height: "100%",
@@ -398,7 +398,7 @@ export function AppShell() {
       )}
 
       {/* Center: chat */}
-      <Panel minSize={30}>
+      <Panel id="chat" minSize={30}>
         <div style={{ display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0, height: "100%" }}>
         {/* Top bar with sidebar toggle */}
         <div ref={topBarRef} style={{ display: "flex", alignItems: "center", flexShrink: 0, borderBottom: "1px solid var(--border)", height: 36, background: "var(--bg-panel)" }}>
@@ -739,7 +739,7 @@ export function AppShell() {
             onMouseEnter={(e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.background = "var(--accent)"; }}
             onMouseLeave={(e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.background = "var(--border)"; }}
           />
-          <Panel defaultSize={25} minSize={15} maxSize={45}>
+          <Panel id="right" defaultSize={25} minSize={15} maxSize={45}>
             <div
               style={{
                 height: "100%",
