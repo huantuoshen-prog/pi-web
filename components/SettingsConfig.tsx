@@ -202,23 +202,76 @@ export function SettingsConfig({
       case "about":
         return (
           <>
-            <SecTitle>{isZh ? "版本" : "Version"}</SecTitle>
-            <div style={{ padding: "7px 0", fontSize: 13, color: "var(--text)" }}>
+            <SecTitle>{isZh ? "版本信息" : "Version Info"}</SecTitle>
+            <div style={{ padding: "4px 0", fontSize: 13 }}>
               <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0" }}>
                 <span style={{ color: "var(--text-dim)" }}>pi-web</span>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>{appVersion}</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>v{appVersion}</span>
               </div>
               <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0" }}>
                 <span style={{ color: "var(--text-dim)" }}>pi-coding-agent</span>
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>{piVersion}</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>v{piVersion}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0" }}>
+                <span style={{ color: "var(--text-dim)" }}>Next.js</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>16.2.1</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 0" }}>
+                <span style={{ color: "var(--text-dim)" }}>React</span>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>19.2</span>
               </div>
             </div>
 
-            <SecTitle style={{ marginTop: 12 }}>{isZh ? "维护" : "Maintenance"}</SecTitle>
-            <div style={{ padding: "7px 0", fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+            <SecTitle style={{ marginTop: 14 }}>{isZh ? "上游来源" : "Upstream"}</SecTitle>
+            <div style={{ padding: "4px 0", fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
               {isZh
-                ? "此分叉由 Claude Code (AI) 驱动维护，人工审核确认。提交记录中保留所有原作者签名。"
-                : "This fork is AI-maintained by Claude Code with human review. All original author signatures are preserved in commit history."}
+                ? "基于 agegr/pi-web v0.6.12 的硬分叉，合入了 9 个社区 PR："
+                : "Hard fork of agegr/pi-web v0.6.12, integrating 9 community PRs:"}
+              <div style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 2 }}>
+                {[
+                  { pr: "#42", author: "LQFHUB", desc: isZh ? "修复长会话 JSON 栈溢出" : "Fix JSON stack overflow for long sessions" },
+                  { pr: "#40", author: "fallleave001", desc: isZh ? "运行时读取版本号" : "Read versions at runtime" },
+                  { pr: "#14", author: "xianzhe233", desc: "LaTeX " + (isZh ? "数学公式渲染" : "math rendering") },
+                  { pr: "#45", author: "looluo", desc: isZh ? "自动生成会话摘要标题" : "Auto-generate session titles" },
+                  { pr: "#39", author: "fallleave001", desc: isZh ? "工具独立开关面板" : "Per-tool toggle panel" },
+                  { pr: "#26", author: "kami1983", desc: isZh ? "命令复制按钮" : "Command copy button" },
+                  { pr: "#34", author: "liuzyong", desc: isZh ? "docx/pdf 文件预览" : "docx/pdf preview" },
+                  { pr: "#13", author: "Chasen-Liao", desc: isZh ? "Electron 桌面应用" : "Electron desktop app" },
+                  { pr: "#19", author: "huantuoshen-prog", desc: isZh ? "中英双语国际化" : "i18n (zh-CN + en)" },
+                ].map((p) => (
+                  <div key={p.pr} style={{ fontSize: 11, display: "flex", gap: 8 }}>
+                    <span style={{ color: "var(--accent)", fontFamily: "var(--font-mono)", minWidth: 26 }}>{p.pr}</span>
+                    <span style={{ color: "var(--text)", minWidth: 120 }}>{p.author}</span>
+                    <span style={{ color: "var(--text-dim)" }}>{p.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <SecTitle style={{ marginTop: 14 }}>{isZh ? "维护方式" : "Maintenance"}</SecTitle>
+            <div style={{ padding: "4px 0", fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+              {isZh
+                ? "此分叉由 Claude Code (AI) 驱动维护 — 代码筛选、合并、冲突解决、验证均由 AI 执行，人工审核确认。Git 提交历史中保留所有原作者的签名和时间戳。"
+                : "AI-maintained by Claude Code — code review, merge, conflict resolution, and verification are AI-executed with human oversight. Original author signatures preserved in git history."}
+            </div>
+
+            <SecTitle style={{ marginTop: 14 }}>{isZh ? "链接" : "Links"}</SecTitle>
+            <div style={{ padding: "4px 0", fontSize: 12, lineHeight: 1.8 }}>
+              <a href="https://github.com/huantuoshen-prog/pi-web" target="_blank" rel="noreferrer" style={{ color: "var(--accent)", textDecoration: "none" }}>
+                {isZh ? "分叉仓库" : "Fork repo"} — github.com/huantuoshen-prog/pi-web
+              </a>
+              <br />
+              <a href="https://github.com/agegr/pi-web" target="_blank" rel="noreferrer" style={{ color: "var(--text-dim)", textDecoration: "none" }}>
+                {isZh ? "上游仓库" : "Upstream"} — github.com/agegr/pi-web
+              </a>
+              <br />
+              <a href="https://github.com/badlogic/pi-mono" target="_blank" rel="noreferrer" style={{ color: "var(--text-dim)", textDecoration: "none" }}>
+                pi agent — github.com/badlogic/pi-mono
+              </a>
+            </div>
+
+            <div style={{ marginTop: 16, fontSize: 11, color: "var(--text-dim)", opacity: 0.6 }}>
+              MIT License · &copy; 2026
             </div>
           </>
         );
