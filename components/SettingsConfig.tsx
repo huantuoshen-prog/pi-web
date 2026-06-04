@@ -41,10 +41,12 @@ interface Props {
   sidebarOpen: boolean;
   rightPanelOpen: boolean;
   isDark: boolean;
-  themeMode: "manual" | "system" | "schedule";
+  themeMode: "manual" | "system" | "schedule" | "sun";
   schedule: { darkStart: string; darkEnd: string };
-  setThemeMode: (mode: "manual" | "system" | "schedule") => void;
+  coords: { lat: number; lng: number } | null;
+  setThemeMode: (mode: "manual" | "system" | "schedule" | "sun") => void;
   setSchedule: (darkStart: string, darkEnd: string) => void;
+  setCoords: (lat: number, lng: number) => void;
   systemPrompt: string | null;
   hasActiveSession: boolean;
   appVersion: string;
@@ -59,7 +61,7 @@ interface Props {
 }
 
 export function SettingsConfig({
-  sidebarOpen, rightPanelOpen, isDark, themeMode, schedule, setThemeMode, setSchedule,
+  sidebarOpen, rightPanelOpen, isDark, themeMode, schedule, coords, setThemeMode, setSchedule, setCoords,
   systemPrompt, hasActiveSession,
   appVersion, piVersion,
   onToggleSidebar, onToggleRightPanel, onToggleTheme, onSwitchLocale,
@@ -136,10 +138,11 @@ export function SettingsConfig({
         return (
           <>
             <SecTitle>{sh("themeToggle")}</SecTitle>
-            <div style={{ padding: "4px 0 8px", display: "flex", gap: 6 }}>
+            <div style={{ padding: "4px 0 8px", display: "flex", gap: 6, flexWrap: "wrap" }}>
               {([
                 { key: "manual" as const, label: isZh ? "手动" : "Manual" },
                 { key: "system" as const, label: isZh ? "跟随系统" : "System" },
+                { key: "sun" as const, label: isZh ? "日落日出" : "Sun" },
                 { key: "schedule" as const, label: isZh ? "定时切换" : "Schedule" },
               ]).map((m) => (
                 <button key={m.key} onClick={() => setThemeMode(m.key)}
@@ -157,6 +160,34 @@ export function SettingsConfig({
             {themeMode === "manual" && (
               <div style={{ padding: "4px 0 8px" }}>
                 <Toggle label={isDark ? (isZh ? "深色模式" : "Dark mode") : (isZh ? "浅色模式" : "Light mode")} value={isDark} onChange={() => onToggleTheme()} />
+              </div>
+            )}
+            {themeMode === "sun" && (
+              <div style={{ padding: "4px 0 8px", fontSize: 12, color: "var(--text-dim)" }}>
+                {coords ? (
+                  <span>
+                    {isZh ? "已定位" : "Located"}: {coords.lat.toFixed(1)}°, {coords.lng.toFixed(1)}°
+                    {" · "}{isZh ? "自动根据当地日落日出切换深色模式" : "Auto-switching based on local sunrise/sunset"}
+                  </span>
+                ) : (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span>{isZh ? "需要位置权限以计算日落日出时间" : "Location needed to calculate sunrise/sunset"}</span>
+                    <button
+                      onClick={() => {
+                        navigator.geolocation.getCurrentPosition(
+                          (pos) => setCoords(pos.coords.latitude, pos.coords.longitude),
+                          () => alert(isZh ? "无法获取位置，请检查浏览器权限设置" : "Unable to get location. Check browser permissions."),
+                        );
+                      }}
+                      style={{
+                        padding: "4px 10px", borderRadius: 6, border: "1px solid var(--accent)",
+                        background: "none", color: "var(--accent)", cursor: "pointer", fontSize: 11,
+                      }}
+                    >
+                      {isZh ? "授权位置" : "Allow location"}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
             {themeMode === "schedule" && (
