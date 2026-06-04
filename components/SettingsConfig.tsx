@@ -229,18 +229,24 @@ export function SettingsConfig({
                 : "Hard fork of agegr/pi-web v0.6.12, integrating 9 community PRs:"}
               <div style={{ marginTop: 4, display: "flex", flexDirection: "column", gap: 2 }}>
                 {[
-                  { pr: "#42", author: "LQFHUB", desc: isZh ? "修复长会话 JSON 栈溢出" : "Fix JSON stack overflow for long sessions" },
-                  { pr: "#40", author: "fallleave001", desc: isZh ? "运行时读取版本号" : "Read versions at runtime" },
-                  { pr: "#14", author: "xianzhe233", desc: "LaTeX " + (isZh ? "数学公式渲染" : "math rendering") },
-                  { pr: "#45", author: "looluo", desc: isZh ? "自动生成会话摘要标题" : "Auto-generate session titles" },
-                  { pr: "#39", author: "fallleave001", desc: isZh ? "工具独立开关面板" : "Per-tool toggle panel" },
-                  { pr: "#26", author: "kami1983", desc: isZh ? "命令复制按钮" : "Command copy button" },
-                  { pr: "#34", author: "liuzyong", desc: isZh ? "docx/pdf 文件预览" : "docx/pdf preview" },
-                  { pr: "#13", author: "Chasen-Liao", desc: isZh ? "Electron 桌面应用" : "Electron desktop app" },
-                  { pr: "#19", author: "huantuoshen-prog", desc: isZh ? "中英双语国际化" : "i18n (zh-CN + en)" },
+                  { pr: "42", author: "LQFHUB", desc: isZh ? "修复长会话 JSON 栈溢出" : "Fix JSON stack overflow for long sessions" },
+                  { pr: "40", author: "fallleave001", desc: isZh ? "运行时读取版本号" : "Read versions at runtime" },
+                  { pr: "14", author: "xianzhe233", desc: "LaTeX " + (isZh ? "数学公式渲染" : "math rendering") },
+                  { pr: "45", author: "looluo", desc: isZh ? "自动生成会话摘要标题" : "Auto-generate session titles" },
+                  { pr: "39", author: "fallleave001", desc: isZh ? "工具独立开关面板" : "Per-tool toggle panel" },
+                  { pr: "26", author: "kami1983", desc: isZh ? "命令复制按钮" : "Command copy button" },
+                  { pr: "34", author: "liuzyong", desc: isZh ? "docx/pdf 文件预览" : "docx/pdf preview" },
+                  { pr: "13", author: "Chasen-Liao", desc: isZh ? "Electron 桌面应用" : "Electron desktop app" },
+                  { pr: "19", author: "huantuoshen-prog", desc: isZh ? "中英双语国际化" : "i18n (zh-CN + en)" },
                 ].map((p) => (
                   <div key={p.pr} style={{ fontSize: 11, display: "flex", gap: 8 }}>
-                    <span style={{ color: "var(--accent)", fontFamily: "var(--font-mono)", minWidth: 26 }}>{p.pr}</span>
+                    <a
+                      href={`https://github.com/agegr/pi-web/pull/${p.pr}`}
+                      target="_blank" rel="noreferrer"
+                      style={{ color: "var(--accent)", fontFamily: "var(--font-mono)", minWidth: 26, textDecoration: "none" }}
+                    >
+                      #{p.pr}
+                    </a>
                     <span style={{ color: "var(--text)", minWidth: 120 }}>{p.author}</span>
                     <span style={{ color: "var(--text-dim)" }}>{p.desc}</span>
                   </div>
