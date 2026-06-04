@@ -126,6 +126,7 @@ export function AppShell() {
 
   // Panel resize drag handlers
   const resizeRef = useRef<{ target: "sidebar" | "right"; startX: number; startWidth: number } | null>(null);
+  const [resizing, setResizing] = useState(false);
   useEffect(() => {
     const onMove = (e: MouseEvent) => {
       if (!resizeRef.current) return;
@@ -137,7 +138,7 @@ export function AppShell() {
         setRightPanelWidth(Math.max(300, Math.min(window.innerWidth * 0.6, startWidth - delta)));
       }
     };
-    const onUp = () => { resizeRef.current = null; document.body.style.cursor = ""; document.body.style.userSelect = ""; };
+    const onUp = () => { resizeRef.current = null; setResizing(false); document.body.style.cursor = ""; document.body.style.userSelect = ""; };
     document.addEventListener("mousemove", onMove);
     document.addEventListener("mouseup", onUp);
     return () => { document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); };
@@ -384,6 +385,8 @@ export function AppShell() {
   return (
     <>
     <div style={{ display: "flex", height: "100dvh", overflow: "hidden", background: "var(--bg)" }}>
+      {/* Full-screen drag overlay to prevent iframe/content from eating mousemove */}
+      {resizing && <div style={{ position: "fixed", inset: 0, zIndex: 9999, cursor: "col-resize" }} />}
       {/* Mobile overlay backdrop */}
       <div
         className="sidebar-overlay-backdrop"
@@ -416,7 +419,7 @@ export function AppShell() {
           </div>
           <div
             style={handleStyle}
-            onMouseDown={(e) => { resizeRef.current = { target: "sidebar", startX: e.clientX, startWidth: sidebarWidth }; document.body.style.cursor = "col-resize"; document.body.style.userSelect = "none"; }}
+            onMouseDown={(e) => { resizeRef.current = { target: "sidebar", startX: e.clientX, startWidth: sidebarWidth }; setResizing(true); document.body.style.cursor = "col-resize"; document.body.style.userSelect = "none"; }}
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--accent)"; }}
             onMouseLeave={(e) => { if (!resizeRef.current) (e.currentTarget as HTMLElement).style.background = "var(--border)"; }}
           />
@@ -762,7 +765,7 @@ export function AppShell() {
         <>
           <div
             style={handleStyle}
-            onMouseDown={(e) => { resizeRef.current = { target: "right", startX: e.clientX, startWidth: rightPanelWidth }; document.body.style.cursor = "col-resize"; document.body.style.userSelect = "none"; }}
+            onMouseDown={(e) => { resizeRef.current = { target: "right", startX: e.clientX, startWidth: rightPanelWidth }; setResizing(true); document.body.style.cursor = "col-resize"; document.body.style.userSelect = "none"; }}
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--accent)"; }}
             onMouseLeave={(e) => { if (!resizeRef.current) (e.currentTarget as HTMLElement).style.background = "var(--border)"; }}
           />
