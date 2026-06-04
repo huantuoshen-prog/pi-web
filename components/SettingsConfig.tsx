@@ -41,6 +41,10 @@ interface Props {
   sidebarOpen: boolean;
   rightPanelOpen: boolean;
   isDark: boolean;
+  themeMode: "manual" | "system" | "schedule";
+  schedule: { darkStart: string; darkEnd: string };
+  setThemeMode: (mode: "manual" | "system" | "schedule") => void;
+  setSchedule: (darkStart: string, darkEnd: string) => void;
   systemPrompt: string | null;
   hasActiveSession: boolean;
   appVersion: string;
@@ -55,7 +59,8 @@ interface Props {
 }
 
 export function SettingsConfig({
-  sidebarOpen, rightPanelOpen, isDark, systemPrompt, hasActiveSession,
+  sidebarOpen, rightPanelOpen, isDark, themeMode, schedule, setThemeMode, setSchedule,
+  systemPrompt, hasActiveSession,
   appVersion, piVersion,
   onToggleSidebar, onToggleRightPanel, onToggleTheme, onSwitchLocale,
   currentLocale, onClose, onVisibilityChange,
@@ -131,12 +136,63 @@ export function SettingsConfig({
         return (
           <>
             <SecTitle>{sh("themeToggle")}</SecTitle>
-            <div style={{ padding: "0 0 12px" }}>
-              <Toggle label={isDark ? (isZh ? "深色模式" : "Dark mode") : (isZh ? "浅色模式" : "Light mode")} value={isDark} onChange={() => onToggleTheme()} />
+            <div style={{ padding: "4px 0 8px", display: "flex", gap: 6 }}>
+              {([
+                { key: "manual" as const, label: isZh ? "手动" : "Manual" },
+                { key: "system" as const, label: isZh ? "跟随系统" : "System" },
+                { key: "schedule" as const, label: isZh ? "定时切换" : "Schedule" },
+              ]).map((m) => (
+                <button key={m.key} onClick={() => setThemeMode(m.key)}
+                  style={{
+                    padding: "5px 12px", borderRadius: 7, border: "1px solid var(--border)",
+                    background: themeMode === m.key ? "var(--accent)" : "none",
+                    color: themeMode === m.key ? "#fff" : "var(--text-muted)",
+                    cursor: "pointer", fontSize: 12, fontWeight: themeMode === m.key ? 600 : 400,
+                  }}
+                >
+                  {m.label}
+                </button>
+              ))}
             </div>
+            {themeMode === "manual" && (
+              <div style={{ padding: "4px 0 8px" }}>
+                <Toggle label={isDark ? (isZh ? "深色模式" : "Dark mode") : (isZh ? "浅色模式" : "Light mode")} value={isDark} onChange={() => onToggleTheme()} />
+              </div>
+            )}
+            {themeMode === "schedule" && (
+              <div style={{ padding: "4px 0 8px", display: "flex", alignItems: "center", gap: 8 }}>
+                <div>
+                  <div style={{ fontSize: 10, color: "var(--text-dim)", marginBottom: 2 }}>{isZh ? "深色开始" : "Dark from"}</div>
+                  <input
+                    type="time"
+                    value={schedule.darkStart}
+                    onChange={(e) => setSchedule(e.target.value, schedule.darkEnd)}
+                    style={{
+                      padding: "4px 8px", borderRadius: 6, border: "1px solid var(--border)",
+                      background: "var(--bg)", color: "var(--text)", fontSize: 13,
+                      fontFamily: "var(--font-mono)",
+                    }}
+                  />
+                </div>
+                <span style={{ color: "var(--text-dim)", fontSize: 12, marginTop: 14 }}>{isZh ? "至" : "to"}</span>
+                <div>
+                  <div style={{ fontSize: 10, color: "var(--text-dim)", marginBottom: 2 }}>{isZh ? "深色结束" : "Dark until"}</div>
+                  <input
+                    type="time"
+                    value={schedule.darkEnd}
+                    onChange={(e) => setSchedule(schedule.darkStart, e.target.value)}
+                    style={{
+                      padding: "4px 8px", borderRadius: 6, border: "1px solid var(--border)",
+                      background: "var(--bg)", color: "var(--text)", fontSize: 13,
+                      fontFamily: "var(--font-mono)",
+                    }}
+                  />
+                </div>
+              </div>
+            )}
 
-            <SecTitle>{isZh ? "语言" : "Language"}</SecTitle>
-            <div style={{ display: "flex", gap: 6, padding: "7px 0 12px" }}>
+            <SecTitle style={{ marginTop: 8 }}>{isZh ? "语言" : "Language"}</SecTitle>
+            <div style={{ display: "flex", gap: 6, padding: "7px 0" }}>
               {(["zh-CN", "en"] as const).map((l) => (
                 <button key={l} onClick={() => onSwitchLocale(l)}
                   style={{
