@@ -3,7 +3,6 @@
 import { useState, useCallback, useRef, useEffect, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Group, Panel, Separator } from "react-resizable-panels";
 import { SessionSidebar } from "./SessionSidebar";
 import { ChatWindow } from "./ChatWindow";
 import { FileViewer } from "./FileViewer";
@@ -34,6 +33,8 @@ export function AppShell() {
   const [skillsConfigOpen, setSkillsConfigOpen] = useState(false);
   const [toolsConfigOpen, setToolsConfigOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(300);
+  const [rightPanelWidth, setRightPanelWidth] = useState(500);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
   const localeMenuRef = useRef<HTMLDivElement>(null);
   const localeBtnRef = useRef<HTMLButtonElement>(null);
@@ -122,6 +123,25 @@ export function AppShell() {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [localeMenuOpen]);
+
+  // Panel resize drag handlers
+  const resizeRef = useRef<{ target: "sidebar" | "right"; startX: number; startWidth: number } | null>(null);
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!resizeRef.current) return;
+      const { target, startX, startWidth } = resizeRef.current;
+      const delta = e.clientX - startX;
+      if (target === "sidebar") {
+        setSidebarWidth(Math.max(200, Math.min(800, startWidth + delta)));
+      } else {
+        setRightPanelWidth(Math.max(300, Math.min(window.innerWidth * 0.6, startWidth - delta)));
+      }
+    };
+    const onUp = () => { resizeRef.current = null; document.body.style.cursor = ""; document.body.style.userSelect = ""; };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+    return () => { document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); };
+  }, []);
 
   // Right panel — file tabs only
   const [fileTabs, setFileTabs] = useState<Tab[]>([]);
@@ -355,9 +375,15 @@ export function AppShell() {
     </>
   );
 
+  const handleStyle: React.CSSProperties = {
+    width: 4, cursor: "col-resize", flexShrink: 0,
+    background: "var(--border)", transition: "background 0.15s",
+    zIndex: 10,
+  };
+
   return (
     <>
-    <Group orientation="horizontal" style={{ height: "100dvh", overflow: "hidden", background: "var(--bg)" }} defaultLayout={{ sidebar: 22, chat: 53, right: 25 }}>
+    <div style={{ display: "flex", height: "100dvh", overflow: "hidden", background: "var(--bg)" }}>
       {/* Mobile overlay backdrop */}
       <div
         className="sidebar-overlay-backdrop"
@@ -376,29 +402,29 @@ export function AppShell() {
       {/* Left sidebar */}
       {sidebarOpen && (
         <>
-          <Panel id="sidebar" defaultSize={22} minSize={14} maxSize={55}>
-            <div
-              style={{
-                height: "100%",
-                background: "var(--bg-panel)",
-                display: "flex",
-                flexDirection: "column",
-                overflow: "hidden",
-              }}
-            >
-              {sidebarContent}
-            </div>
-          </Panel>
-          <Separator
-            style={{ width: 4, background: "var(--border)", transition: "background 0.15s" }}
-            onMouseEnter={(e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.background = "var(--accent)"; }}
-            onMouseLeave={(e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.background = "var(--border)"; }}
+          <div
+            style={{
+              width: sidebarWidth,
+              flexShrink: 0,
+              background: "var(--bg-panel)",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
+          >
+            {sidebarContent}
+          </div>
+          <div
+            style={handleStyle}
+            onMouseDown={(e) => { resizeRef.current = { target: "sidebar", startX: e.clientX, startWidth: sidebarWidth }; document.body.style.cursor = "col-resize"; document.body.style.userSelect = "none"; }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--accent)"; }}
+            onMouseLeave={(e) => { if (!resizeRef.current) (e.currentTarget as HTMLElement).style.background = "var(--border)"; }}
           />
         </>
       )}
 
       {/* Center: chat */}
-      <Panel id="chat" minSize={30}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0 }}>
         <div style={{ display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0, height: "100%" }}>
         {/* Top bar with sidebar toggle */}
         <div ref={topBarRef} style={{ display: "flex", alignItems: "center", flexShrink: 0, borderBottom: "1px solid var(--border)", height: 36, background: "var(--bg-panel)" }}>
@@ -729,53 +755,52 @@ export function AppShell() {
           ) : null}
         </div>
       </div>
-      </Panel>
+      </div>
 
       {/* Right panel: file viewer */}
       {rightPanelOpen && (
         <>
-          <Separator
-            style={{ width: 4, background: "var(--border)", transition: "background 0.15s" }}
-            onMouseEnter={(e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.background = "var(--accent)"; }}
-            onMouseLeave={(e: React.MouseEvent) => { (e.currentTarget as HTMLElement).style.background = "var(--border)"; }}
+          <div
+            style={handleStyle}
+            onMouseDown={(e) => { resizeRef.current = { target: "right", startX: e.clientX, startWidth: rightPanelWidth }; document.body.style.cursor = "col-resize"; document.body.style.userSelect = "none"; }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "var(--accent)"; }}
+            onMouseLeave={(e) => { if (!resizeRef.current) (e.currentTarget as HTMLElement).style.background = "var(--border)"; }}
           />
-          <Panel id="right" defaultSize={25} minSize={15} maxSize={45}>
-            <div
-              style={{
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                borderLeft: "1px solid var(--border)",
-                background: "var(--bg)",
-              }}
-            >
-              {/* Right panel tab bar */}
-              <div style={{ display: "flex", alignItems: "center", flexShrink: 0, background: "var(--bg-panel)", borderBottom: "1px solid var(--border)", height: 36 }}>
-                <div style={{ flex: 1, overflow: "hidden" }}>
-                  <TabBar
-                    tabs={fileTabs}
-                    activeTabId={activeFileTabId ?? ""}
-                    onSelectTab={setActiveFileTabId}
-                    onCloseTab={handleCloseFileTab}
-                  />
-                </div>
-              </div>
-
-              {/* File content */}
+          <div
+            style={{
+              width: rightPanelWidth,
+              flexShrink: 0,
+              display: "flex",
+              flexDirection: "column",
+              background: "var(--bg)",
+            }}
+          >
+            {/* Right panel tab bar */}
+            <div style={{ display: "flex", alignItems: "center", flexShrink: 0, background: "var(--bg-panel)", borderBottom: "1px solid var(--border)", height: 36 }}>
               <div style={{ flex: 1, overflow: "hidden" }}>
-                {activeFileTab?.filePath ? (
-                  <FileViewer filePath={activeFileTab.filePath} cwd={activeCwd ?? undefined} />
-                ) : (
-                  <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-dim)", fontSize: 12 }}>
-                    {sh("noFileOpen")}
-                  </div>
-                )}
+                <TabBar
+                  tabs={fileTabs}
+                  activeTabId={activeFileTabId ?? ""}
+                  onSelectTab={setActiveFileTabId}
+                  onCloseTab={handleCloseFileTab}
+                />
               </div>
             </div>
-          </Panel>
+
+            {/* File content */}
+            <div style={{ flex: 1, overflow: "hidden" }}>
+              {activeFileTab?.filePath ? (
+                <FileViewer filePath={activeFileTab.filePath} cwd={activeCwd ?? undefined} />
+              ) : (
+                <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-dim)", fontSize: 12 }}>
+                  {sh("noFileOpen")}
+                </div>
+              )}
+            </div>
+          </div>
         </>
       )}
-    </Group>
+    </div>
     {/* File panel toggle — always visible at top-right */}
     <button
       onClick={() => setRightPanelOpen((v) => !v)}
