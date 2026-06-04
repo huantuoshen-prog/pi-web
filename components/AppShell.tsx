@@ -894,6 +894,8 @@ export function AppShell() {
         isDark={isDark}
         systemPrompt={systemPrompt}
         hasActiveSession={!!selectedSession}
+        appVersion={process.env.NEXT_PUBLIC_APP_VERSION ?? "0.0.0"}
+        piVersion={process.env.NEXT_PUBLIC_PI_VERSION ?? "0.0.0"}
         onToggleSidebar={() => setSidebarOpen((v) => !v)}
         onToggleRightPanel={() => setRightPanelOpen((v) => !v)}
         onToggleTheme={toggleTheme}
