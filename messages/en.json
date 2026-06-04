@@ -276,7 +276,17 @@
     "switchLanguage": "Switch language",
     "chinese": "中文",
     "english": "English",
-    "tools": "Tools"
+    "tools": "Tools",
+    "settings": "Settings",
+    "topbarButtons": "Top Bar Buttons",
+    "sidebarToggle": "Sidebar toggle",
+    "languageSwitch": "Language switch",
+    "themeToggle": "Theme toggle",
+    "branchNav": "Branch navigator",
+    "systemPrompt": "System prompt",
+    "filePanelToggle": "File panel toggle",
+    "show": "Show",
+    "hide": "Hide"
   },
   "tools": {
     "title": "Tools",

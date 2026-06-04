@@ -276,7 +276,17 @@
     "switchLanguage": "切换语言",
     "chinese": "中文",
     "english": "English",
-    "tools": "工具"
+    "tools": "工具",
+    "settings": "设置",
+    "topbarButtons": "顶栏按钮",
+    "sidebarToggle": "侧边栏切换",
+    "languageSwitch": "语言切换",
+    "themeToggle": "深色模式切换",
+    "branchNav": "分支导航",
+    "systemPrompt": "系统 Prompt",
+    "filePanelToggle": "文件面板切换",
+    "show": "显示",
+    "hide": "隐藏"
   },
   "tools": {
     "title": "工具配置",

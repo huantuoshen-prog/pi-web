@@ -10,6 +10,7 @@ import { TabBar, type Tab } from "./TabBar";
 import { ModelsConfig } from "./ModelsConfig";
 import { SkillsConfig } from "./SkillsConfig";
 import { ToolsConfig } from "./ToolsConfig";
+import { SettingsConfig } from "./SettingsConfig";
 import { BranchNavigator } from "./BranchNavigator";
 import { useTheme } from "@/hooks/useTheme";
 import type { SessionInfo, SessionTreeNode } from "@/lib/types";
@@ -32,7 +33,14 @@ export function AppShell() {
   const [modelsRefreshKey, setModelsRefreshKey] = useState(0);
   const [skillsConfigOpen, setSkillsConfigOpen] = useState(false);
   const [toolsConfigOpen, setToolsConfigOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [visibleButtons, setVisibleButtons] = useState(() => {
+    try {
+      const raw = localStorage.getItem("pi-web-topbar-buttons");
+      return raw ? JSON.parse(raw) : null;
+    } catch { return null; }
+  });
   const [sidebarWidth, setSidebarWidth] = useState(300);
   const [rightPanelWidth, setRightPanelWidth] = useState(500);
   const [localeMenuOpen, setLocaleMenuOpen] = useState(false);
@@ -396,6 +404,8 @@ export function AppShell() {
     zIndex: 10,
   };
 
+  const showBtn = (key: string) => !visibleButtons || (visibleButtons as any)?.[key] !== false;
+
   return (
     <>
     <div style={{ display: "flex", height: "100dvh", overflow: "hidden", background: "var(--bg)" }}>
@@ -446,6 +456,7 @@ export function AppShell() {
         <div style={{ display: "flex", flexDirection: "column", overflow: "hidden", minWidth: 0, height: "100%" }}>
         {/* Top bar with sidebar toggle */}
         <div ref={topBarRef} style={{ display: "flex", alignItems: "center", flexShrink: 0, borderBottom: "1px solid var(--border)", height: 36, background: "var(--bg-panel)" }}>
+          {showBtn("sidebar") && (
           <button
             onClick={() => setSidebarOpen((v) => !v)}
             title={sidebarOpen ? sh("hideSidebar") : sh("showSidebar")}
@@ -468,7 +479,9 @@ export function AppShell() {
               </svg>
             )}
           </button>
+          )}
           {/* Locale switcher */}
+          {showBtn("locale") && (
           <div ref={localeMenuRef} style={{ position: "relative", display: "flex" }}>
             <button
               ref={localeBtnRef}
@@ -536,6 +549,8 @@ export function AppShell() {
               </div>
             );})()}
           </div>
+          )}
+          {showBtn("theme") && (
           <button
             onClick={(e) => {
               toggleTheme({ x: e.clientX, y: e.clientY });
@@ -566,21 +581,25 @@ export function AppShell() {
               </svg>
             )}
           </button>
+          )}
           {showChat && (
             <div style={{ display: "flex", alignItems: "stretch", height: "100%" }}>
-              <BranchNavigator
-                tree={branchTree}
-                activeLeafId={branchActiveLeafId}
-                onLeafChange={handleBranchLeafChange}
-                inline
-                containerRef={topBarRef}
-                open={activeTopPanel === "branches"}
-                onToggle={() => toggleTopPanel("branches")}
-                hasSession
-              />
-              <button
-                ref={systemBtnRef}
-                onClick={() => toggleTopPanel("system")}
+              {showBtn("branch") && (
+                <BranchNavigator
+                  tree={branchTree}
+                  activeLeafId={branchActiveLeafId}
+                  onLeafChange={handleBranchLeafChange}
+                  inline
+                  containerRef={topBarRef}
+                  open={activeTopPanel === "branches"}
+                  onToggle={() => toggleTopPanel("branches")}
+                  hasSession
+                />
+              )}
+              {showBtn("system") && (
+                <button
+                  ref={systemBtnRef}
+                  onClick={() => toggleTopPanel("system")}
                 style={{
                   display: "flex", alignItems: "center", gap: 6,
                   height: "100%", padding: "0 12px",
@@ -603,8 +622,26 @@ export function AppShell() {
                 </svg>
                 <span>{sh("system")}</span>
               </button>
+              )}
             </div>
           )}
+          {/* Settings gear button */}
+          <button
+            onClick={() => setSettingsOpen(true)}
+            title={sh("settings")}
+            style={{
+              display: "flex", alignItems: "center", gap: 5, height: 36,
+              padding: "0 12px", background: "none", border: "none", borderRight: "1px solid var(--border)",
+              color: "var(--text-muted)", cursor: "pointer", fontSize: 12,
+              transition: "color 0.12s", flexShrink: 0,
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "var(--text)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "var(--text-muted)"; }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+          </button>
           {/* Session stats — right-aligned in top bar */}
           {showChat && (sessionStats || contextUsage) && (() => {
             const t = sessionStats?.tokens;
@@ -820,6 +857,7 @@ export function AppShell() {
       )}
     </div>
     {/* File panel toggle — always visible at top-right */}
+    {showBtn("filePanel") && (
     <button
       onClick={() => setRightPanelOpen((v) => !v)}
       title={rightPanelOpen ? sh("filePanelHide") : sh("filePanelShow")}
@@ -838,6 +876,7 @@ export function AppShell() {
         <rect x="3" y="3" width="18" height="18" rx="2" /><line x1="15" y1="3" x2="15" y2="21" />
       </svg>
     </button>
+    )}
     {modelsConfigOpen && <ModelsConfig onClose={() => { setModelsConfigOpen(false); setModelsRefreshKey((k) => k + 1); }} />}
     {skillsConfigOpen && (activeCwd ?? selectedSession?.cwd ?? newSessionCwd) && (
       <SkillsConfig cwd={(activeCwd ?? selectedSession?.cwd ?? newSessionCwd)!} onClose={() => setSkillsConfigOpen(false)} />
@@ -846,6 +885,22 @@ export function AppShell() {
       <ToolsConfig
         cwd={selectedSession?.cwd ?? newSessionCwd ?? activeCwd ?? null}
         onClose={() => setToolsConfigOpen(false)}
+      />
+    )}
+    {settingsOpen && (
+      <SettingsConfig
+        sidebarOpen={sidebarOpen}
+        rightPanelOpen={rightPanelOpen}
+        isDark={isDark}
+        systemPrompt={systemPrompt}
+        hasActiveSession={!!selectedSession}
+        onToggleSidebar={() => setSidebarOpen((v) => !v)}
+        onToggleRightPanel={() => setRightPanelOpen((v) => !v)}
+        onToggleTheme={toggleTheme}
+        onSwitchLocale={(l) => { document.cookie = `NEXT_LOCALE=${l};path=/;max-age=31536000`; window.location.reload(); }}
+        currentLocale={locale}
+        onClose={() => setSettingsOpen(false)}
+        onVisibilityChange={setVisibleButtons}
       />
     )}
     </>
