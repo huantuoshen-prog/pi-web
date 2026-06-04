@@ -22,7 +22,7 @@ export function AppShell() {
   const locale = useLocale();
   const sh = useTranslations("shell");
   const cht = useTranslations("chat");
-  const { isDark, toggleTheme, themeMode, schedule, coords, setThemeMode, setSchedule, setCoords } = useTheme();
+  const { isDark, toggleTheme, themeMode, schedule, coords, sunTimes, setThemeMode, setSchedule, setCoords } = useTheme();
   const [selectedSession, setSelectedSession] = useState<SessionInfo | null>(null);
   // When user clicks +, we only store the cwd — no fake session id
   const [newSessionCwd, setNewSessionCwd] = useState<string | null>(null);
@@ -895,6 +895,7 @@ export function AppShell() {
         themeMode={themeMode}
         schedule={schedule}
         coords={coords}
+        sunTimes={sunTimes}
         setThemeMode={setThemeMode}
         setSchedule={setSchedule}
         setCoords={setCoords}

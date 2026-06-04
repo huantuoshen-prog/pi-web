@@ -165,5 +165,7 @@ export function useTheme() {
       .catch(() => {});
   }, [themeMode]);
 
-  return { theme, toggleTheme, themeMode, schedule, coords, setThemeMode, setSchedule, setCoords, isDark: theme === "dark" };
+  const sunTimes = coords ? getSunTimes(coords.lat, coords.lng, new Date()) : null;
+
+  return { theme, toggleTheme, themeMode, schedule, coords, sunTimes, setThemeMode, setSchedule, setCoords, isDark: theme === "dark" };
 }

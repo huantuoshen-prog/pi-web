@@ -44,6 +44,7 @@ interface Props {
   themeMode: "manual" | "system" | "schedule" | "sun";
   schedule: { darkStart: string; darkEnd: string };
   coords: { lat: number; lng: number } | null;
+  sunTimes: { sunrise: number; sunset: number } | null;
   setThemeMode: (mode: "manual" | "system" | "schedule" | "sun") => void;
   setSchedule: (darkStart: string, darkEnd: string) => void;
   setCoords: (lat: number, lng: number) => void;
@@ -61,7 +62,7 @@ interface Props {
 }
 
 export function SettingsConfig({
-  sidebarOpen, rightPanelOpen, isDark, themeMode, schedule, coords, setThemeMode, setSchedule, setCoords,
+  sidebarOpen, rightPanelOpen, isDark, themeMode, schedule, coords, sunTimes, setThemeMode, setSchedule, setCoords,
   systemPrompt, hasActiveSession,
   appVersion, piVersion,
   onToggleSidebar, onToggleRightPanel, onToggleTheme, onSwitchLocale,
@@ -167,6 +168,12 @@ export function SettingsConfig({
                 {coords ? (
                   <span>
                     {isZh ? "已定位" : "Located"}: {coords.lat.toFixed(1)}°, {coords.lng.toFixed(1)}°
+                    {sunTimes && (
+                      <span style={{ color: "var(--text)" }}>
+                        {" · "}{isZh ? "日出" : "Sunrise"} {String(Math.floor(sunTimes.sunrise / 60)).padStart(2, "0")}:{String(Math.floor(sunTimes.sunrise % 60)).padStart(2, "0")}
+                        {" · "}{isZh ? "日落" : "Sunset"} {String(Math.floor(sunTimes.sunset / 60)).padStart(2, "0")}:{String(Math.floor(sunTimes.sunset % 60)).padStart(2, "0")}
+                      </span>
+                    )}
                     {" · "}{isZh ? "自动根据当地日落日出切换深色模式" : "Auto-switching based on local sunrise/sunset"}
                   </span>
                 ) : (
