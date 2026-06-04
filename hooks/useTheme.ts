@@ -33,33 +33,28 @@ function resolveScheduledTheme(darkStart: string, darkEnd: string): Theme {
   return hhmm >= start || hhmm < end ? "dark" : "light";
 }
 
-// ── sunrise/sunset calculation (NOAA) ──
+// ── sunrise/sunset calculation ──
 function getSunTimes(lat: number, lng: number, date: Date): { sunrise: number; sunset: number } {
   const toRad = Math.PI / 180;
-  const toDeg = 180 / Math.PI;
-  const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / 86400000);
   const zenith = 90.833 * toRad;
-  const lngHour = lng / 15;
-  const tRise = dayOfYear + ((6 - lngHour) / 24);
-  const tSet = dayOfYear + ((18 - lngHour) / 24);
-  function calc(t: number) {
-    const M = (0.9856 * t - 3.289) * toRad;
-    const L = (M + (1.916 * Math.sin(M) + 0.020 * Math.sin(2 * M) + 282.634) * toRad) % (2 * Math.PI);
-    const RA = Math.atan2(0.91746 * Math.sin(L), Math.cos(L));
-    const dec = Math.asin(0.39782 * Math.sin(L));
-    const cosH = (Math.cos(zenith) - Math.sin(lat * toRad) * Math.sin(dec)) / (Math.cos(lat * toRad) * Math.cos(dec));
-    if (cosH > 1) return -1; // never sets
-    if (cosH < -1) return -2; // never rises
-    return (Math.acos(cosH) * toDeg) / 15;
-  }
-  const haRise = calc(tRise), haSet = calc(tSet);
-  const utRise = (6 - lngHour) - haRise, utSet = (18 - lngHour) + haSet;
-  const tz = -date.getTimezoneOffset() / 60;
-  const minutesRise = ((utRise + tz) % 24 + 24) % 24;
-  const minutesSet = ((utSet + tz) % 24 + 24) % 24;
-  const sunrise = minutesRise * 60;
-  const sunset = minutesSet * 60;
-  return { sunrise, sunset };
+  const dayOfYear = Math.floor((date.getTime() - new Date(date.getFullYear(), 0, 0).getTime()) / 86400000) + 1;
+  // solar declination
+  const dec = 23.45 * toRad * Math.sin(toRad * (360 / 365) * (284 + dayOfYear));
+  // equation of time (minutes)
+  const B = toRad * (360 / 365) * (dayOfYear - 81);
+  const eqTime = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+  // solar noon (UTC hours)
+  const solarNoon = 12 - lng / 15 - eqTime / 60;
+  // hour angle
+  const cosHA = (Math.cos(zenith) - Math.sin(lat * toRad) * Math.sin(dec)) / (Math.cos(lat * toRad) * Math.cos(dec));
+  if (cosHA > 1) return { sunrise: 0, sunset: 24 * 60 };   // polar night
+  if (cosHA < -1) return { sunrise: 0, sunset: 0 };          // polar day
+  const ha = Math.acos(cosHA) * (180 / Math.PI) / 15;       // hours
+  // UTC → local time
+  const offset = -date.getTimezoneOffset() / 60;
+  const sunrise = ((solarNoon - ha + offset) % 24 + 24) % 24;
+  const sunset = ((solarNoon + ha + offset) % 24 + 24) % 24;
+  return { sunrise: sunrise * 60, sunset: sunset * 60 };
 }
 
 function resolveSunTheme(lat: number, lng: number): Theme {
