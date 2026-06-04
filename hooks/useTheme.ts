@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 
 type Theme = "light" | "dark";
 type ThemeMode = "manual" | "system" | "schedule";
@@ -34,16 +34,15 @@ function resolveScheduledTheme(darkStart: string, darkEnd: string): Theme {
   const start = sh * 60 + sm;
   const end = eh * 60 + em;
   if (start < end) return hhmm >= start && hhmm < end ? "dark" : "light";
-  // overnight (e.g. 18:00-06:00): dark from start to midnight OR midnight to end
   return hhmm >= start || hhmm < end ? "dark" : "light";
 }
 
-function getStoredMode(): ThemeMode {
+function loadMode(): ThemeMode {
   try { return (localStorage.getItem("pi-theme-mode") as ThemeMode) || "manual"; }
   catch { return "manual"; }
 }
 
-function getStoredSchedule(): { darkStart: string; darkEnd: string } {
+function loadSchedule(): { darkStart: string; darkEnd: string } {
   try {
     const raw = localStorage.getItem("pi-theme-schedule");
     if (raw) return JSON.parse(raw);
@@ -51,105 +50,77 @@ function getStoredSchedule(): { darkStart: string; darkEnd: string } {
   return { darkStart: "18:00", darkEnd: "06:00" };
 }
 
+function applyTheme(next: Theme) {
+  if (next === "dark") {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+  try { localStorage.setItem("pi-theme", next); } catch { /* */ }
+  listeners.forEach((cb) => cb());
+}
+
 type ToggleOrigin = { x: number; y: number };
 
 export function useTheme() {
   const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const [themeMode, setThemeModeState] = useState<ThemeMode>(loadMode);
+  const [schedule, setScheduleState] = useState(loadSchedule);
 
   // Auto-apply theme based on mode
   useEffect(() => {
-    const mode = getStoredMode();
-    if (mode === "manual") return;
-
-    let next: Theme;
-    if (mode === "system") {
-      next = resolveSystemTheme();
-    } else {
-      const s = getStoredSchedule();
-      next = resolveScheduledTheme(s.darkStart, s.darkEnd);
-    }
+    if (themeMode === "manual") return;
 
     const apply = () => {
-      if (next === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-      try { localStorage.setItem("pi-theme", next); } catch { /* */ }
-      listeners.forEach((cb) => cb());
+      const next = themeMode === "system"
+        ? resolveSystemTheme()
+        : resolveScheduledTheme(schedule.darkStart, schedule.darkEnd);
+      applyTheme(next);
     };
 
     apply();
 
-    if (mode === "system") {
+    if (themeMode === "system") {
       const mq = window.matchMedia("(prefers-color-scheme: dark)");
-      const onChange = () => {
-        const t = resolveSystemTheme();
-        if (t === "dark") document.documentElement.classList.add("dark");
-        else document.documentElement.classList.remove("dark");
-        try { localStorage.setItem("pi-theme", t); } catch { /* */ }
-        listeners.forEach((cb) => cb());
-      };
+      const onChange = () => applyTheme(resolveSystemTheme());
       mq.addEventListener("change", onChange);
       return () => mq.removeEventListener("change", onChange);
     }
 
-    if (mode === "schedule") {
-      // Check every minute for schedule change
+    if (themeMode === "schedule") {
       const interval = setInterval(() => {
-        const s = getStoredSchedule();
+        const s = loadSchedule();
         const t = resolveScheduledTheme(s.darkStart, s.darkEnd);
-        if (getSnapshot() !== t) {
-          if (t === "dark") document.documentElement.classList.add("dark");
-          else document.documentElement.classList.remove("dark");
-          try { localStorage.setItem("pi-theme", t); } catch { /* */ }
-          listeners.forEach((cb) => cb());
-        }
+        if (getSnapshot() !== t) applyTheme(t);
       }, 60_000);
       return () => clearInterval(interval);
     }
-  }, []);
+  }, [themeMode, schedule]);
 
   const setThemeMode = useCallback((mode: ThemeMode) => {
     try { localStorage.setItem("pi-theme-mode", mode); } catch { /* */ }
-    if (mode === "manual") return;
-    const next = mode === "system"
-      ? resolveSystemTheme()
-      : resolveScheduledTheme(getStoredSchedule().darkStart, getStoredSchedule().darkEnd);
-    if (next === "dark") document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
-    try { localStorage.setItem("pi-theme", next); } catch { /* */ }
-    listeners.forEach((cb) => cb());
+    setThemeModeState(mode);
   }, []);
 
   const setSchedule = useCallback((darkStart: string, darkEnd: string) => {
-    try { localStorage.setItem("pi-theme-schedule", JSON.stringify({ darkStart, darkEnd })); } catch { /* */ }
-    const next = resolveScheduledTheme(darkStart, darkEnd);
-    if (next === "dark") document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
-    try { localStorage.setItem("pi-theme", next); } catch { /* */ }
-    listeners.forEach((cb) => cb());
-  }, []);
+    const s = { darkStart, darkEnd };
+    try { localStorage.setItem("pi-theme-schedule", JSON.stringify(s)); } catch { /* */ }
+    setScheduleState(s);
+    if (themeMode === "schedule") {
+      applyTheme(resolveScheduledTheme(darkStart, darkEnd));
+    }
+  }, [themeMode]);
 
   const toggleTheme = useCallback((origin?: ToggleOrigin) => {
-    // Only used in manual mode toggle
     const current = getSnapshot();
     const next: Theme = current === "dark" ? "light" : "dark";
 
-    // If auto mode is active, switch to manual first
-    const mode = getStoredMode();
-    if (mode !== "manual") {
-      try { localStorage.setItem("pi-theme-mode", "manual"); } catch { /* */ }
+    if (themeMode !== "manual") {
+      setThemeMode("manual");
     }
 
     const apply = () => {
-      if (next === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-      try { localStorage.setItem("pi-theme", next); } catch { /* */ }
-      listeners.forEach((cb) => cb());
+      applyTheme(next);
     };
 
     const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -185,10 +156,7 @@ export function useTheme() {
         );
       })
       .catch(() => { /* transition cancelled */ });
-  }, []);
-
-  const themeMode = getStoredMode();
-  const schedule = getStoredSchedule();
+  }, [themeMode]);
 
   return { theme, toggleTheme, themeMode, schedule, setThemeMode, setSchedule, isDark: theme === "dark" };
 }
